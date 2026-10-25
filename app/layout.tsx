@@ -34,8 +34,7 @@ export default function RootLayout({
           <div className="mx-auto max-w-3xl px-4 py-6 text-sm text-zinc-600">
             <p>
               Bu kurs manipülasyondan korunmayı öğretir; manipüle etmeyi
-              öğretmez. Günlük yazıların yalnızca kendi tarayıcında saklanır,
-              hiçbir sunucuya gönderilmez.
+              öğretmez. Yazıların sende kalır.
             </p>
           </div>
         </footer>

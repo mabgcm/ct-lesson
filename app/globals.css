@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 body {
-  background: #ffffff;
-  color: #18181b;
-  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f5f4;
+  color: #1c1917;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 :focus-visible {

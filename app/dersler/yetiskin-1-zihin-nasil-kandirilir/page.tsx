@@ -55,20 +55,20 @@ const SLIDE_KEY = "zihin-kalkani-ders1-slayt";
 const VISITED_KEY = "zihin-kalkani-ders1-ziyaret-edilen";
 
 const SLIDES = [
-  { id: "giris", title: "Giriş ve Etik Sözleşmesi" },
-  { id: "kanca", title: "Kanca" },
-  { id: "mikro-1-metin", title: "Mikro ders 1 metni — Hızlı düşünme" },
-  { id: "mikro-1-etkilesim", title: "Mikro ders 1 etkileşimi — Eşleştirme ve mini quiz 1" },
-  { id: "mikro-2-metin", title: "Mikro ders 2 metni — Onay önyargısı" },
-  { id: "mikro-2-etkilesim", title: "Mikro ders 2 etkileşimi — Tuzağı işaretle ve mini quiz 2" },
-  { id: "mikro-3-metin", title: "Mikro ders 3 metni — Duygu tuzağı" },
-  { id: "mikro-3-etkilesim", title: "Mikro ders 3 etkileşimi — Tahmin anketi ve mini quiz 3" },
-  { id: "senaryo", title: "Dallanan Senaryo" },
-  { id: "tersine", title: "Tersine Yazma" },
-  { id: "cikis", title: "Çıkış Bileti" },
-  { id: "transfer", title: "Transfer Görevi" },
-  { id: "rubrik", title: "Öz Rubrik" },
-  { id: "gunluk", title: "Karar Günlüğü" },
+  { id: "giris", title: "Başlangıç" },
+  { id: "kanca", title: "İlk mesaj" },
+  { id: "mikro-1-metin", title: "Hızlı düşünme" },
+  { id: "mikro-1-etkilesim", title: "Hızlı düşünme — Dene" },
+  { id: "mikro-2-metin", title: "Onay önyargısı" },
+  { id: "mikro-2-etkilesim", title: "Onay önyargısı — Dene" },
+  { id: "mikro-3-metin", title: "Duygu tuzağı" },
+  { id: "mikro-3-etkilesim", title: "Duygu tuzağı — Dene" },
+  { id: "senaryo", title: "Seçim yap" },
+  { id: "tersine", title: "Kendin yaz" },
+  { id: "cikis", title: "Kısa kontrol" },
+  { id: "transfer", title: "Başka bir alanda dene" },
+  { id: "rubrik", title: "Kendini değerlendir" },
+  { id: "gunluk", title: "Günlüğüne yaz" },
   { id: "kapanis", title: "Kapanış" },
 ];
 
@@ -85,7 +85,7 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
   return (
     <div
       role="status"
-      className="mt-3 rounded-lg border border-zinc-900 bg-zinc-50 p-4 leading-7"
+      className="mt-3 rounded-lg border border-stone-900 bg-zinc-50 p-4 leading-7"
     >
       <p className="font-semibold">{kind === "ok" ? "Doğru:" : "Not:"}</p>
       <div>{children}</div>
@@ -96,36 +96,18 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
 function Slide({
   id,
   title,
-  done,
-  onComplete,
   children,
 }: {
   id: string;
   title: string;
-  done: boolean;
-  onComplete: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} aria-labelledby={`${id}-baslik`} className="mt-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id={`${id}-baslik`} className="text-2xl font-bold">
-          {title}
-        </h2>
-        <span className="text-sm font-semibold">
-          {done ? "Tamamlandı" : "Tamamlanmadı"}
-        </span>
-      </div>
-      <div className="mt-4">{children}</div>
-      {!done && (
-        <button
-          type="button"
-          onClick={onComplete}
-          className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold"
-        >
-          Bu slaydı tamamlandı olarak işaretle
-        </button>
-      )}
+    <section id={id} aria-labelledby={`${id}-baslik`}>
+      <h1 id={`${id}-baslik`} className="text-3xl font-bold leading-snug">
+        {title}
+      </h1>
+      <div className="mt-6 space-y-5 leading-8 text-zinc-800">{children}</div>
     </section>
   );
 }
@@ -151,7 +133,7 @@ function ChoiceButtons({
           onClick={() => onSelect(index)}
           className={`min-h-11 rounded-lg border px-4 py-2 text-left text-base ${
             selected === index
-              ? "border-zinc-900 bg-zinc-900 text-white"
+              ? "border-stone-900 bg-stone-900 text-white"
               : "border-zinc-300 bg-white"
           }`}
         >
@@ -198,7 +180,7 @@ function SingleQuiz({
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold"
+            className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
           >
             Tekrar dene
           </button>
@@ -259,6 +241,7 @@ export default function Lesson1Page() {
   const [data, setData] = useState<Record<string, string>>({});
   const [currentSlide, setCurrentSlide] = useState(0);
   const [visited, setVisited] = useState<number[]>([0]);
+  const [showSlides, setShowSlides] = useState(false);
   const [hookChoice, setHookChoice] = useState<number | null>(null);
   const [matchSelected, setMatchSelected] = useState<number | null>(null);
   const [matched, setMatched] = useState<Record<number, string>>({});
@@ -292,6 +275,7 @@ export default function Lesson1Page() {
 
   const goTo = (index: number) => {
     const clamped = Math.max(0, Math.min(SLIDES.length - 1, index));
+    if (clamped > currentSlide) completeSlide(SLIDES[currentSlide].id);
     setCurrentSlide(clamped);
     setVisited((prev) => (prev.includes(clamped) ? prev : [...prev, clamped]));
   };
@@ -409,29 +393,24 @@ export default function Lesson1Page() {
   // slayta geçer. Böylece sayfa ilk açılışta boş bir "Yükleniyor…"
   // ekranı göstermez. Kaydetme etkileri `loaded` olmadan çalışmaz, bu
   // yüzden varsayılan durum depolanmış ilerlemenin üzerine yazılmaz.
-  const slideNav = (label: string) => (
-    <div aria-label={label} className="flex flex-wrap items-center justify-between gap-3">
-      <p role="status" className="font-semibold">
-        Slayt {currentSlide + 1} / {SLIDES.length} — {SLIDES[currentSlide].title}
-      </p>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={currentSlide === 0}
-          onClick={() => goTo(currentSlide - 1)}
-          className="inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold disabled:opacity-50"
-        >
-          Önceki
-        </button>
-        <button
-          type="button"
-          disabled={currentSlide === SLIDES.length - 1}
-          onClick={() => goTo(currentSlide + 1)}
-          className="inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white disabled:opacity-50"
-        >
-          Sonraki
-        </button>
-      </div>
+  const nav = (
+    <div className="mt-10 flex items-center justify-between gap-3 border-t border-stone-200 pt-6">
+      <button
+        type="button"
+        disabled={currentSlide === 0}
+        onClick={() => goTo(currentSlide - 1)}
+        className="inline-flex min-h-12 items-center rounded-xl border border-stone-300 bg-white px-5 text-sm font-semibold disabled:opacity-40"
+      >
+        ← Önceki
+      </button>
+      <button
+        type="button"
+        disabled={currentSlide === SLIDES.length - 1}
+        onClick={() => goTo(currentSlide + 1)}
+        className="inline-flex min-h-12 items-center rounded-xl bg-stone-900 px-5 text-sm font-semibold text-white disabled:opacity-40"
+      >
+        Sonraki →
+      </button>
     </div>
   );
 
@@ -439,11 +418,11 @@ export default function Lesson1Page() {
     switch (currentSlide) {
       case 0:
         return (
-          <Slide id="giris" title="Giriş ve Etik Sözleşmesi" done={!!done.giris} onComplete={() => completeSlide("giris")}>
+          <Slide id="giris" title="Başlangıç">
             {INTRO_PARAGRAPHS.map((p, i) => (
               <p key={i} className="mt-3 leading-7 text-zinc-800">{p}</p>
             ))}
-            <div className="mt-4 rounded-lg border border-zinc-900 bg-zinc-50 p-4">
+            <div className="mt-4 rounded-lg border border-stone-900 bg-zinc-50 p-4">
               <h3 className="font-bold">Etik sözleşme</h3>
               {ETHICS_TEXT.map((p, i) => (
                 <p key={i} className="mt-2 leading-7 text-zinc-700">{p}</p>
@@ -464,7 +443,7 @@ export default function Lesson1Page() {
               Bu 6 adımı bu derste 3 kez birlikte uygulayacağız, sonra kendi
               örneğinde sen uygulayacaksın.
             </p>
-            <h3 className="mt-5 text-lg font-bold">Öğrenme hedefleri</h3>
+            <h3 className="mt-5 text-lg font-bold">Bu derste ne öğreneceksin</h3>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-zinc-700">
               {OBJECTIVES.map((o) => <li key={o}>{o}</li>)}
             </ul>
@@ -472,16 +451,16 @@ export default function Lesson1Page() {
         );
       case 1:
         return (
-          <Slide id="kanca" title="Kanca" done={!!done.kanca} onComplete={() => completeSlide("kanca")}>
+          <Slide id="kanca" title="İlk mesaj">
             <p className="text-zinc-700">
               Önce şu mesajı oku. Henüz analiz etme, tekniği arama. Sadece ilk
               tepkinin ne olduğunu fark et.
             </p>
-            <div className="mt-3 rounded-lg border border-zinc-900 p-4" aria-label="Kurgusal indirim mesajı örneği">
+            <div className="mt-3 rounded-lg border border-stone-900 p-4" aria-label="Kurgusal indirim mesajı örneği">
               {HOOK_MESSAGE.map((line, i) => (
                 <p key={i} className={i === 0 ? "font-bold" : "mt-1"}>{line}</p>
               ))}
-              <p className="mt-3 inline-block rounded-lg bg-zinc-900 px-4 py-2 font-semibold text-white">
+              <p className="mt-3 inline-block rounded-lg bg-stone-900 px-4 py-2 font-semibold text-white">
                 ŞİMDİ SATIN AL
               </p>
             </div>
@@ -497,14 +476,14 @@ export default function Lesson1Page() {
         );
       case 2:
         return (
-          <Slide id="mikro-1-metin" title="Mikro ders 1 metni — Hızlı düşünme" done={!!done["mikro-1-metin"]} onComplete={() => completeSlide("mikro-1-metin")}>
+          <Slide id="mikro-1-metin" title="Hızlı düşünme">
             <MicroLessonBlock lesson={MICRO_1} />
           </Slide>
         );
       case 3:
         return (
-          <Slide id="mikro-1-etkilesim" title="Mikro ders 1 etkileşimi — Eşleştirme ve mini quiz 1" done={!!done["mikro-1-etkilesim"]} onComplete={() => completeSlide("mikro-1-etkilesim")}>
-            <h3 className="text-lg font-bold">Etkileşim 1 — Eşleştirme</h3>
+          <Slide id="mikro-1-etkilesim" title="Hızlı düşünme — Dene">
+            <h3 className="text-lg font-bold">Dene</h3>
             <p className="mt-2 text-zinc-700">Her durumu doğru düşünme türüyle eşleştir.</p>
             <p className="mt-2 text-sm text-zinc-600">
               Önce bir durumu seç, sonra “Hızlı düşünme” veya “Yavaş düşünme”
@@ -519,7 +498,7 @@ export default function Lesson1Page() {
                   disabled={Boolean(matched[i])}
                   onClick={() => setMatchSelected(i)}
                   className={`min-h-11 rounded-lg border px-4 py-2 text-left ${
-                    matched[i] ? "border-zinc-900 bg-zinc-50" : matchSelected === i ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white"
+                    matched[i] ? "border-stone-900 bg-zinc-50" : matchSelected === i ? "border-stone-900 bg-stone-900 text-white" : "border-zinc-300 bg-white"
                   }`}
                 >
                   {pair.situation}
@@ -547,7 +526,7 @@ export default function Lesson1Page() {
                       setMatchSelected(null);
                     }
                   }}
-                  className="inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {cat}
                 </button>
@@ -557,19 +536,19 @@ export default function Lesson1Page() {
             {Object.keys(matched).length === MATCH_PAIRS.length && (
               <Feedback kind="ok">{MATCH_CORRECT}</Feedback>
             )}
-            <SingleQuiz quiz={MINI_QUIZ_1} title="Mini quiz 1 — Hızlı düşünme" onCorrect={() => {}} />
+            <SingleQuiz quiz={MINI_QUIZ_1} title="Kısa soru" onCorrect={() => {}} />
           </Slide>
         );
       case 4:
         return (
-          <Slide id="mikro-2-metin" title="Mikro ders 2 metni — Onay önyargısı" done={!!done["mikro-2-metin"]} onComplete={() => completeSlide("mikro-2-metin")}>
+          <Slide id="mikro-2-metin" title="Onay önyargısı">
             <MicroLessonBlock lesson={MICRO_2} />
           </Slide>
         );
       case 5:
         return (
-          <Slide id="mikro-2-etkilesim" title="Mikro ders 2 etkileşimi — Tuzağı işaretle ve mini quiz 2" done={!!done["mikro-2-etkilesim"]} onComplete={() => completeSlide("mikro-2-etkilesim")}>
-            <h3 className="text-lg font-bold">Etkileşim 2 — Tuzağı işaretle</h3>
+          <Slide id="mikro-2-etkilesim" title="Onay önyargısı — Dene">
+            <h3 className="text-lg font-bold">Dene</h3>
             <p className="mt-2 text-zinc-700">
               Aşağıdaki kurgusal yorum akışını oku. Onay önyargısını besleyen
               cümleleri tıklayarak işaretle. İşaretlemen gereken 3 cümle var.
@@ -593,7 +572,7 @@ export default function Lesson1Page() {
                     }
                   }}
                   className={`min-h-11 rounded-lg border px-4 py-2 text-left ${
-                    marked.includes(s.id) ? "border-zinc-900 bg-zinc-50" : "border-zinc-300 bg-white"
+                    marked.includes(s.id) ? "border-stone-900 bg-zinc-50" : "border-zinc-300 bg-white"
                   }`}
                 >
                   <span className="text-sm text-zinc-600">{s.user}: </span>
@@ -611,19 +590,19 @@ export default function Lesson1Page() {
                 <Feedback kind="ok">{TRAP_COMPLETE}</Feedback>
               </div>
             )}
-            <SingleQuiz quiz={MINI_QUIZ_2} title="Mini quiz 2 — Onay önyargısı" onCorrect={() => {}} />
+            <SingleQuiz quiz={MINI_QUIZ_2} title="Kısa soru" onCorrect={() => {}} />
           </Slide>
         );
       case 6:
         return (
-          <Slide id="mikro-3-metin" title="Mikro ders 3 metni — Duygu tuzağı" done={!!done["mikro-3-metin"]} onComplete={() => completeSlide("mikro-3-metin")}>
+          <Slide id="mikro-3-metin" title="Duygu tuzağı">
             <MicroLessonBlock lesson={MICRO_3} />
           </Slide>
         );
       case 7:
         return (
-          <Slide id="mikro-3-etkilesim" title="Mikro ders 3 etkileşimi — Tahmin anketi ve mini quiz 3" done={!!done["mikro-3-etkilesim"]} onComplete={() => completeSlide("mikro-3-etkilesim")}>
-            <h3 className="text-lg font-bold">Etkileşim 3 — Tahmin anketi</h3>
+          <Slide id="mikro-3-etkilesim" title="Duygu tuzağı — Dene">
+            <h3 className="text-lg font-bold">Dene</h3>
             <p className="mt-2 text-zinc-700">
               Aşağıdaki kurgusal mesajı oku, sonra tahmin et: Bu mesajın devamında
               ne olacak?
@@ -643,12 +622,12 @@ export default function Lesson1Page() {
                 {POLL_EXPLANATION.map((p, i) => <p key={i} className="mt-2 first:mt-0">{p}</p>)}
               </Feedback>
             )}
-            <SingleQuiz quiz={MINI_QUIZ_3} title="Mini quiz 3 — Duygu tuzağı" onCorrect={() => {}} />
+            <SingleQuiz quiz={MINI_QUIZ_3} title="Kısa soru" onCorrect={() => {}} />
           </Slide>
         );
       case 8:
         return (
-          <Slide id="senaryo" title="Dallanan Senaryo: Arkadaştan gelen bağlantı" done={!!done.senaryo} onComplete={() => completeSlide("senaryo")}>
+          <Slide id="senaryo" title="Seçim yap">
             {SCENARIO_TEXT.map((p, i) => (
               <p key={i} className="mt-3 leading-7 text-zinc-800">{p}</p>
             ))}
@@ -677,7 +656,7 @@ export default function Lesson1Page() {
                         <button
                           type="button"
                           onClick={() => setBranchChoice(null)}
-                          className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold"
+                          className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
                         >
                           Farklı bir seçim dene
                         </button>
@@ -688,7 +667,7 @@ export default function Lesson1Page() {
                           <button
                             type="button"
                             onClick={() => completeSlide("senaryo")}
-                            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+                            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
                           >
                             Devam et
                           </button>
@@ -700,7 +679,7 @@ export default function Lesson1Page() {
                           <button
                             type="button"
                             onClick={() => completeSlide("senaryo")}
-                            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+                            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
                           >
                             Devam et
                           </button>
@@ -715,7 +694,7 @@ export default function Lesson1Page() {
         );
       case 9:
         return (
-          <Slide id="tersine" title="Tersine Yazma" done={!!done.tersine} onComplete={() => completeSlide("tersine")}>
+          <Slide id="tersine" title="Kendin yaz">
             <p className="leading-7 text-zinc-800">
               Şimdi sıra sende. Öğrendiğin tekniklerden birini kullanarak,
               zayıflatılmış (abartısız, tuzağı açıkça görülebilen) bir manipülatif
@@ -772,9 +751,9 @@ export default function Lesson1Page() {
                   completeSlide("tersine");
                 }
               }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
             >
-              Tersine yazmayı kaydet
+              Kaydet
             </button>
             {!reverseSaved && (data["tersine-metin"] ?? "") === "" && (
               <p className="mt-2 text-sm text-zinc-600">Kaydetmek için önce mesajını yaz.</p>
@@ -784,7 +763,7 @@ export default function Lesson1Page() {
               type="button"
               onClick={() => setShowReverseExample((v) => !v)}
               aria-expanded={showReverseExample}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
             >
               Örneği gör
             </button>
@@ -801,11 +780,9 @@ export default function Lesson1Page() {
         );
       case 10:
         return (
-          <Slide id="cikis" title="Çıkış Bileti (3 soru)" done={!!done.cikis} onComplete={() => completeSlide("cikis")}>
+          <Slide id="cikis" title="Kısa kontrol">
             <p className="text-zinc-700">
-              3 soruluk mini test. Bu bir sınav değil; hangi teknikte ek çalışma
-              açılması gerektiğini gösterir. Yanlış cevap verirsen ceza yok, o
-              tekniğin ek mikro dersi açılır.
+              3 kısa soru. Yanlış cevaplarsan o konuyu kısaca tekrar ederiz.
             </p>
             {!exitFinished ? (
               <div className="mt-4">
@@ -837,7 +814,7 @@ export default function Lesson1Page() {
                           completeSlide("cikis");
                         }
                       }}
-                      className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+                      className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
                     >
                       {exitIndex < 2 ? "Sonraki soru" : "Sonucu gör"}
                     </button>
@@ -852,7 +829,7 @@ export default function Lesson1Page() {
                   <div>
                     <Feedback kind="note">{EXIT_SOME_WRONG}</Feedback>
                     {exitMissed.map((mi) => (
-                      <div key={mi} className="mt-4 rounded-lg border border-zinc-900 bg-zinc-50 p-4">
+                      <div key={mi} className="mt-4 rounded-lg border border-stone-900 bg-zinc-50 p-4">
                         <h3 className="font-bold">{EXIT_QUESTIONS[mi].remedialTitle}</h3>
                         <p className="mt-2 leading-7">{EXIT_QUESTIONS[mi].remedialText}</p>
                       </div>
@@ -865,11 +842,9 @@ export default function Lesson1Page() {
         );
       case 11:
         return (
-          <Slide id="transfer" title="Transfer Görevi" done={!!done.transfer} onComplete={() => completeSlide("transfer")}>
+          <Slide id="transfer" title="Başka bir alanda dene">
             <p className="leading-7 text-zinc-800">
-              Aynı teknikleri alışveriş dışında bir alanda uygula. Bu, transfer
-              görevidir: Teknik, yalnızca bir alanda kalırsa unutulur; farklı
-              alanda uygulanırsa kalıcı olur.
+              Şimdi aynı beceriyi alışveriş dışında bir alanda dene.
             </p>
             <blockquote className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 leading-7">
               {TRANSFER_TEXT}
@@ -892,9 +867,9 @@ export default function Lesson1Page() {
                 setTransferSaved(true);
                 completeSlide("transfer");
               }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
             >
-              Transfer görevini kaydet
+              Kaydet
             </button>
             {transferSaved && (
               <div className="mt-4">
@@ -902,7 +877,7 @@ export default function Lesson1Page() {
                   type="button"
                   onClick={() => setShowTransferModel((v) => !v)}
                   aria-expanded={showTransferModel}
-                  className="inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold"
+                  className="inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
                 >
                   Model cevabı gör
                 </button>
@@ -917,7 +892,7 @@ export default function Lesson1Page() {
         );
       case 12:
         return (
-          <Slide id="rubrik" title="Öz Rubrik" done={!!done.rubrik} onComplete={() => completeSlide("rubrik")}>
+          <Slide id="rubrik" title="Kendini değerlendir">
             <p className="text-zinc-700">
               Şimdi kendi analizini 7 soruyla puanla. Her soruya 1 (zayıf) ile 5
               (güçlü) arasında puan ver. Amacın yüksek puan toplamak değil, zayıf
@@ -948,9 +923,9 @@ export default function Lesson1Page() {
             <button
               type="button"
               onClick={() => { setRubricSaved(true); completeSlide("rubrik"); }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
             >
-              Rubriği kaydet
+              Kaydet
             </button>
             {rubricSaved && weakestRubric !== null && (
               <Feedback kind="note">
@@ -961,17 +936,16 @@ export default function Lesson1Page() {
         );
       case 13:
         return (
-          <Slide id="gunluk" title="Karar Günlüğü" done={!!done.gunluk} onComplete={() => completeSlide("gunluk")}>
+          <Slide id="gunluk" title="Günlüğüne yaz">
             <p className="leading-7 text-zinc-800">
               Şimdi kendi hayatından 1 örneği FARK ET ile yaz. Bu giriş, kurs
-              sonundaki kişisel Kalkan Dosyası&apos;na eklenecek. Günlüğün sana
-              aittir; bu derste sunucuya gönderilmez.
+              sonundaki kişisel Kalkan Dosyası&apos;na eklenecek. Yazıların sende kalır.
             </p>
             <button
               type="button"
               onClick={() => setShowJournalExample((v) => !v)}
               aria-expanded={showJournalExample}
-              className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-zinc-900 px-4 text-sm font-semibold"
+              className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
             >
               Örneği gör
             </button>
@@ -997,16 +971,16 @@ export default function Lesson1Page() {
                   completeSlide("gunluk");
                 }
               }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
             >
-              Günlüğü kaydet
+              Kaydet
             </button>
             {journalSaved && <Feedback kind="ok">{JOURNAL_SAVED}</Feedback>}
           </Slide>
         );
       case 14:
         return (
-          <Slide id="kapanis" title="Kapanış" done={!!done.kapanis} onComplete={() => completeSlide("kapanis")}>
+          <Slide id="kapanis" title="Kapanış">
             <h3 className="text-lg font-bold">Bu derste 3 şeyi öğrendin:</h3>
             <ol className="mt-2 list-decimal space-y-2 pl-5 leading-7 text-zinc-800">
               {CLOSING_POINTS.map((p) => <li key={p}>{p}</li>)}
@@ -1020,10 +994,9 @@ export default function Lesson1Page() {
             </p>
             <p className="mt-3 leading-7 text-zinc-700">
               Bu dersin günlük girişi Kalkan Dosyası&apos;na eklendi. Kurs sonunda
-              tüm girişlerin, rubriklerin ve karar protokollerin tek bir dosyada
-              toplanacak.
+              tüm yazıların tek bir dosyada toplanacak.
             </p>
-            <h3 className="mt-5 text-lg font-bold">Sonraki adım: e-posta güçlendirmeleri</h3>
+            <h3 className="mt-5 text-lg font-bold">Sonraki adım</h3>
             <p className="mt-2 text-zinc-700">
               Ders bitti. Her e-posta tek eylem içerir, uzun metin içermez.
               Bağlantı doğrudan göreve gider.
@@ -1041,7 +1014,7 @@ export default function Lesson1Page() {
               görevler, sistem kurulduğunda gönderilecek güçlendirmelerin
               içeriğidir.
             </p>
-            <a href="/" className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white">
+            <a href="/" onClick={() => completeSlide("kapanis")} className="mt-4 inline-flex min-h-12 items-center rounded-xl bg-stone-900 px-5 text-sm font-semibold text-white">
               Ana sayfaya dön
             </a>
           </Slide>
@@ -1052,25 +1025,10 @@ export default function Lesson1Page() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
-      <p className="text-sm font-semibold uppercase tracking-wide text-zinc-600">
-        Yetişkin · Ders 1 / 8 · 40–52 dakika
-      </p>
-      <h1 className="mt-2 text-4xl font-bold leading-tight">
-        Zihin Nasıl Kandırılır?
-      </h1>
-      <p className="mt-3 leading-7 text-zinc-700">
-        Bu derste 3 teknik öğreneceksin: hızlı düşünme, onay önyargısı ve
-        duygu tuzağı. Ders bireyseldir; canlı ders, grup veya sohbet yoktur.
-        Her ekranda tek bir slayt görürsün.
-      </p>
-
-      <div className="mt-6 rounded-lg border border-zinc-200 p-4">
-        <p className="font-semibold" role="status">
-          İlerleme: {doneCount} / {SLIDES.length} slayt tamamlandı
-        </p>
+    <div className="min-h-screen bg-stone-100 px-4 py-6 sm:py-10">
+      <div className="mx-auto max-w-2xl">
         <div
-          className="mt-2 h-3 w-full rounded-full bg-zinc-200"
+          className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200"
           role="progressbar"
           aria-valuenow={doneCount}
           aria-valuemin={0}
@@ -1078,66 +1036,60 @@ export default function Lesson1Page() {
           aria-label="Ders ilerlemesi"
         >
           <div
-            className="h-3 rounded-full bg-zinc-900"
+            className="h-full rounded-full bg-stone-900"
             style={{ width: `${(doneCount / SLIDES.length) * 100}%` }}
           />
         </div>
-        <p className="mt-2 text-sm">
-          Kaldığın yer: Slayt {currentSlide + 1} — {SLIDES[currentSlide].title}
-          {doneCount === SLIDES.length && " · Dersi tamamladın."}
+        <p className="mt-5 text-center text-sm font-medium text-stone-500">
+          Zihin Nasıl Kandırılır? · Slayt {currentSlide + 1} / {SLIDES.length}
         </p>
-        <p className="mt-2 text-sm text-zinc-600">
-          İlerlemen ve günlük yazıların yalnızca bu tarayıcıda saklanır,
-          hiçbir sunucuya gönderilmez. Sayfayı yenilersen kaldığın slayta
-          dönersin.
+        <main className="mt-4 rounded-3xl bg-white p-6 shadow-sm sm:p-10">
+          {renderSlide()}
+          {nav}
+        </main>
+        <div className="mt-5 text-center">
+          <button
+            type="button"
+            aria-expanded={showSlides}
+            onClick={() => setShowSlides((v) => !v)}
+            className="inline-flex min-h-11 items-center rounded-full border border-stone-300 bg-white px-5 text-sm font-semibold"
+          >
+            Slaytlar
+          </button>
+          {showSlides && (
+            <ol className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-2 text-left sm:grid-cols-2">
+              {SLIDES.map((s, i) => {
+                const enabled = canJump(i);
+                return (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      disabled={!enabled}
+                      onClick={() => {
+                        goTo(i);
+                        setShowSlides(false);
+                      }}
+                      aria-current={i === currentSlide ? "true" : undefined}
+                      className={`min-h-11 w-full rounded-xl border px-4 py-2 text-left text-sm ${
+                        i === currentSlide
+                          ? "border-stone-900 bg-stone-900 text-white"
+                          : enabled
+                            ? "border-stone-300 bg-white"
+                            : "border-stone-200 bg-stone-50 text-stone-400"
+                      }`}
+                    >
+                      {i + 1}. {s.title}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </div>
+        <p className="mt-5 text-center text-sm text-stone-500">
+          Yazıların sende kalır.
         </p>
       </div>
-
-      <nav aria-label="Slayt genel bakışı" className="mt-6">
-        <h2 className="text-lg font-bold">Slaytlar</h2>
-        <ol className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {SLIDES.map((s, i) => {
-            const enabled = canJump(i);
-            return (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  disabled={!enabled}
-                  onClick={() => goTo(i)}
-                  aria-current={i === currentSlide ? "true" : undefined}
-                  className={`min-h-11 w-full rounded-lg border px-3 py-2 text-left text-sm ${
-                    i === currentSlide
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : enabled
-                        ? "border-zinc-300 bg-white"
-                        : "border-zinc-200 bg-zinc-50 text-zinc-400"
-                  }`}
-                >
-                  {i + 1}. {s.title} —{" "}
-                  {done[s.id]
-                    ? "Tamamlandı"
-                    : i === currentSlide
-                      ? "Şu anki slayt"
-                      : enabled
-                        ? "Açık"
-                        : "Henüz"}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-        <p className="mt-2 text-sm text-zinc-600">
-          Önceki slaytlara her zaman dönebilirsin. Sağ ve sol ok tuşlarıyla da
-          slayt değiştirebilirsin; yazı alanlarındayken ok tuşları metni
-          düzenler.
-        </p>
-      </nav>
-
-      <div className="mt-8 border-t border-zinc-200 pt-6">{slideNav("Üst slayt gezintisi")}</div>
-
-      {renderSlide()}
-
-      <div className="mt-8 border-t border-zinc-200 pt-6">{slideNav("Alt slayt gezintisi")}</div>
     </div>
   );
 }

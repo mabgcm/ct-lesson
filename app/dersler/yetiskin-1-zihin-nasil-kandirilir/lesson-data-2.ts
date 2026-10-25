@@ -139,10 +139,10 @@ export const EXIT_QUESTIONS: ExitQuestion[] = [
 ];
 
 export const EXIT_ALL_CORRECT =
-  "3'te 3. Bu dersin 3 tekniğini de ismiyle tanıyorsun. Şimdi transfer görevi ve günlükle dersi kapatacağız.";
+  "3'te 3. Bu dersin 3 tekniğini de ismiyle tanıyorsun. Şimdi başka bir alanda deneme ve günlükle dersi kapatacağız.";
 
 export const EXIT_SOME_WRONG =
-  "Bir veya birkaç teknikte ek çalışma açıldı. Bu, geri kaldığın anlamına gelmez; sistem tam bunun için var: Zayıf kalan teknik, ek mikro dersle güçlenir. Ek çalışmayı tamamladıktan sonra devam edebilirsin.";
+  "Bir veya birkaç konuda ek çalışma açıldı. Bu, geri kaldığın anlamına gelmez; bu ders tam bunun için var: Zayıf kalan konu, kısa tekrarla güçlenir. Ek çalışmayı tamamladıktan sonra devam edebilirsin.";
 
 export const TRANSFER_TEXT =
   "“Yeni bitkisel karışım! Kullananların %94'ü 1 haftada kendini daha enerjik hissetti. Doktorlar bunu konuşmuyor çünkü ilaç firmaları istemiyor. Stoklar tükenmeden sen de dene, yoksa geç kalırsın!”";
