@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ETHICS_TEXT,
   FARK_ET,
@@ -81,14 +81,47 @@ function readStored<T>(key: string, fallback: T): T {
   }
 }
 
+function Tick({ size = "md" }: { size?: "md" | "lg" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`flex shrink-0 items-center justify-center rounded-full bg-stone-900 text-white ${
+        size === "lg" ? "h-9 w-9" : "h-7 w-7"
+      }`}
+    >
+      <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden="true">
+        <path
+          d="M4 10.5 8.5 15 16 5.5"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
 function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.ReactNode }) {
   return (
     <div
       role="status"
-      className="mt-3 rounded-lg border border-stone-900 bg-zinc-50 p-4 leading-7"
+      className="mt-4 flex gap-3 rounded-2xl border border-stone-900 bg-zinc-50 p-4 leading-7 shadow-sm"
     >
-      <p className="font-semibold">{kind === "ok" ? "Doğru:" : "Not:"}</p>
-      <div>{children}</div>
+      {kind === "ok" ? (
+        <Tick />
+      ) : (
+        <span
+          aria-hidden="true"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-stone-900 font-bold"
+        >
+          !
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className="font-semibold">{kind === "ok" ? "Doğru:" : "Not:"}</p>
+        <div>{children}</div>
+      </div>
     </div>
   );
 }
@@ -117,29 +150,71 @@ function ChoiceButtons({
   selected,
   onSelect,
   label,
+  answerIndex = null,
+  showResult = false,
 }: {
   options: string[];
   selected: number | null;
   onSelect: (index: number) => void;
   label: string;
+  answerIndex?: number | null;
+  showResult?: boolean;
 }) {
   return (
-    <div role="group" aria-label={label} className="mt-3 flex flex-col gap-2">
-      {options.map((option, index) => (
-        <button
-          key={option}
-          type="button"
-          aria-pressed={selected === index}
-          onClick={() => onSelect(index)}
-          className={`min-h-11 rounded-lg border px-4 py-2 text-left text-base ${
-            selected === index
-              ? "border-stone-900 bg-stone-900 text-white"
-              : "border-zinc-300 bg-white"
-          }`}
-        >
-          {option}
-        </button>
-      ))}
+    <div role="group" aria-label={label} className="mt-3 flex flex-col gap-3">
+      {options.map((option, index) => {
+        const letter = String.fromCharCode(65 + index);
+        const isCorrect = showResult && answerIndex === index;
+        const isWrongSelected =
+          showResult && selected === index && answerIndex !== index;
+        const isSelected = selected === index;
+        return (
+          <button
+            key={option}
+            type="button"
+            aria-pressed={isSelected}
+            onClick={() => onSelect(index)}
+            className={`flex min-h-14 items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left text-base shadow-sm transition hover:shadow ${
+              isCorrect
+                ? "border-emerald-700 bg-emerald-50"
+                : isWrongSelected
+                  ? "border-red-300 bg-red-50"
+                  : isSelected
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-zinc-300 bg-white hover:border-stone-400"
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 font-bold ${
+                isCorrect
+                  ? "border-emerald-700 bg-emerald-700 text-white"
+                  : isWrongSelected
+                    ? "border-red-400 bg-white text-red-700"
+                    : isSelected
+                      ? "border-white bg-white text-stone-900"
+                      : "border-zinc-300 bg-stone-100 text-stone-700"
+              }`}
+            >
+              {letter}
+            </span>
+            <span className="min-w-0 flex-1 pt-1 leading-6">{option}</span>
+            {isCorrect && (
+              <span aria-hidden="true" className="shrink-0 pt-1">
+                <Tick />
+              </span>
+            )}
+            {isWrongSelected && (
+              <span
+                aria-hidden="true"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold text-red-700"
+              >
+                ✕
+              </span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -148,27 +223,34 @@ function SingleQuiz({
   quiz,
   title,
   onCorrect,
+  selected,
+  onSelect,
 }: {
   quiz: QuizQuestion;
   title: string;
   onCorrect: () => void;
+  selected: number | null;
+  onSelect: (index: number | null) => void;
 }) {
-  const [selected, setSelected] = useState<number | null>(null);
   const answered = selected !== null;
   const correct = selected === quiz.answerIndex;
   return (
-    <div className="mt-6 rounded-lg border border-zinc-200 p-4">
-      <h3 className="text-lg font-bold">{title}</h3>
-      <p className="mt-2 text-zinc-700">
+    <div className="mt-8 rounded-2xl border border-zinc-200 bg-stone-50 p-5 shadow-sm">
+      <p className="inline-flex items-center rounded-full bg-stone-900 px-3 py-1 text-xs font-bold text-white">
+        {title}
+      </p>
+      <p className="mt-3 text-zinc-700">
         Kısa bir pekiştirme sorusu. Bu bir sınav değil; az önce öğrendiğin
         tekniği kendi başına geri çağırman için.
       </p>
-      <p className="mt-3 font-semibold">{quiz.question}</p>
+      <p className="mt-3 text-lg font-semibold leading-7">{quiz.question}</p>
       <ChoiceButtons
         options={quiz.options}
         selected={selected}
+        answerIndex={quiz.answerIndex}
+        showResult={answered}
         onSelect={(i) => {
-          setSelected(i);
+          onSelect(i);
           if (i === quiz.answerIndex) onCorrect();
         }}
         label={title}
@@ -179,12 +261,210 @@ function SingleQuiz({
           <Feedback kind="note">{quiz.wrongFeedback}</Feedback>
           <button
             type="button"
-            onClick={() => setSelected(null)}
-            className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
+            onClick={() => onSelect(null)}
+            className="mt-4 inline-flex min-h-12 items-center rounded-xl border-2 border-stone-900 bg-white px-5 text-sm font-semibold"
           >
             Tekrar dene
           </button>
         </div>
+      )}
+    </div>
+  );
+}
+
+const MATCH_CATEGORIES = ["Hızlı düşünme", "Yavaş düşünme"] as const;
+
+function MatchingGame({ onComplete }: { onComplete: () => void }) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [matched, setMatched] = useState<Record<number, string>>({});
+  const [wrong, setWrong] = useState(false);
+  const [drag, setDrag] = useState<{
+    index: number;
+    x: number;
+    y: number;
+    moved: boolean;
+  } | null>(null);
+  const [hoverCategory, setHoverCategory] = useState<string | null>(null);
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+  const completedRef = useRef(false);
+
+  const place = (index: number, category: string) => {
+    const pair = MATCH_PAIRS[index];
+    if (pair.answer === category) {
+      const next = { ...matched, [index]: category };
+      setMatched(next);
+      setSelected(null);
+      setWrong(false);
+      if (Object.keys(next).length === MATCH_PAIRS.length && !completedRef.current) {
+        completedRef.current = true;
+        onComplete();
+      }
+    } else {
+      setWrong(true);
+      setSelected(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!drag) return;
+    const onMove = (e: PointerEvent) => {
+      const start = startRef.current;
+      const moved =
+        !!start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8;
+      setDrag((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY, moved } : prev));
+      if (moved) {
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const zone = el?.closest?.("[data-drop-category]");
+        setHoverCategory(zone?.getAttribute("data-drop-category") ?? null);
+      }
+    };
+    const onUp = () => {
+      setDrag((prev) => {
+        if (prev?.moved && hoverCategory) place(prev.index, hoverCategory);
+        else if (prev && !prev.moved) {
+          setSelected((cur) => (cur === prev.index ? null : prev.index));
+        }
+        return null;
+      });
+      setHoverCategory(null);
+      startRef.current = null;
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drag?.index, drag?.moved, hoverCategory, matched]);
+
+  const unmatched = MATCH_PAIRS.map((pair, i) => ({ pair, i })).filter(
+    ({ i }) => !matched[i],
+  );
+
+  return (
+    <div>
+      <p className="mt-2 text-zinc-700">
+        Bir durumu tutup doğru kutuya sürükle. Sürükleyemezsen kartı seç, sonra
+        kutunun altındaki düğmeye dokun.
+      </p>
+      <div className="mt-5 grid gap-5 sm:grid-cols-2">
+        <div>
+          <p className="text-sm font-bold text-stone-500">Durumlar</p>
+          <div className="mt-3 flex flex-col gap-3" role="group" aria-label="Eşleştirilecek durumlar">
+            {unmatched.map(({ pair, i }) => (
+              <div
+                key={pair.situation}
+                role="button"
+                tabIndex={0}
+                aria-pressed={selected === i}
+                aria-label={`${pair.situation}. Sürüklemek için tut, seçmek için dokun veya Enter'a bas.`}
+                onPointerDown={(e) => {
+                  startRef.current = { x: e.clientX, y: e.clientY };
+                  setDrag({ index: i, x: e.clientX, y: e.clientY, moved: false });
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelected((cur) => (cur === i ? null : i));
+                  }
+                }}
+                className={`flex min-h-14 cursor-grab touch-none items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left leading-6 shadow-sm transition active:cursor-grabbing ${
+                  drag?.index === i && drag.moved
+                    ? "opacity-40"
+                    : selected === i
+                      ? "border-stone-900 bg-stone-900 text-white"
+                      : "border-zinc-300 bg-white hover:border-stone-400"
+                }`}
+              >
+                <span aria-hidden="true" className="shrink-0 text-lg leading-none opacity-60">
+                  ⋮⋮
+                </span>
+                <span className="min-w-0 flex-1">{pair.situation}</span>
+              </div>
+            ))}
+            {unmatched.length === 0 && (
+              <p className="rounded-2xl border border-zinc-200 bg-stone-50 p-4 text-zinc-600">
+                Tüm durumlar yerleştirildi.
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-4">
+          {MATCH_CATEGORIES.map((cat) => {
+            const placed = MATCH_PAIRS.map((pair, i) => ({ pair, i })).filter(
+              ({ i }) => matched[i] === cat,
+            );
+            const isHover = hoverCategory === cat;
+            return (
+              <div
+                key={cat}
+                data-drop-category={cat}
+                className={`min-h-40 rounded-2xl border-2 p-4 transition ${
+                  isHover
+                    ? "border-stone-900 bg-stone-100 shadow-md"
+                    : "border-dashed border-zinc-300 bg-stone-50"
+                }`}
+              >
+                <p className="flex items-center justify-between font-bold">
+                  {cat}
+                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-stone-500">
+                    {placed.length} yerleşti
+                  </span>
+                </p>
+                <div className="mt-3 flex flex-col gap-2">
+                  {placed.map(({ pair, i }) => (
+                    <div
+                      key={pair.situation}
+                      className="flex items-start gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-sm leading-6"
+                    >
+                      <Tick />
+                      <span className="min-w-0 flex-1">{pair.situation}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const next = { ...matched };
+                          delete next[i];
+                          setMatched(next);
+                        }}
+                        className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-zinc-300 px-3 text-xs font-semibold"
+                      >
+                        Geri al
+                      </button>
+                    </div>
+                  ))}
+                  {placed.length === 0 && (
+                    <p className="rounded-xl bg-white p-3 text-sm text-zinc-500">
+                      Buraya sürükleyip bırak.
+                    </p>
+                  )}
+                </div>
+                {selected !== null && (
+                  <button
+                    type="button"
+                    onClick={() => place(selected, cat)}
+                    className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white"
+                  >
+                    Seçili durumu buraya yerleştir
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {drag?.moved && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed z-50 max-w-72 -translate-y-1/2 rounded-2xl bg-stone-900 px-4 py-3 text-white shadow-xl"
+          style={{ left: drag.x + 16, top: drag.y }}
+        >
+          {MATCH_PAIRS[drag.index].situation}
+        </div>
+      )}
+      {wrong && <Feedback kind="note">{MATCH_WRONG}</Feedback>}
+      {Object.keys(matched).length === MATCH_PAIRS.length && (
+        <Feedback kind="ok">{MATCH_CORRECT}</Feedback>
       )}
     </div>
   );
@@ -198,7 +478,7 @@ function MicroLessonBlock({ lesson }: { lesson: MicroLesson }) {
           {p}
         </p>
       ))}
-      <figure className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+      <figure className="mt-5 rounded-2xl border border-zinc-200 bg-stone-50 p-5 shadow-sm">
         <figcaption className="font-semibold">{lesson.diagramTitle}</figcaption>
         <p className="mt-2 leading-7 text-zinc-700">{lesson.diagram}</p>
       </figure>
@@ -229,7 +509,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="mt-1 w-full rounded-lg border border-zinc-300 p-3 text-base"
+        className="mt-2 w-full rounded-xl border-2 border-zinc-300 bg-white p-4 text-base outline-none transition focus:border-stone-900 focus:ring-2 focus:ring-stone-200"
       />
     </div>
   );
@@ -243,9 +523,6 @@ export default function Lesson1Page() {
   const [visited, setVisited] = useState<number[]>([0]);
   const [showSlides, setShowSlides] = useState(false);
   const [hookChoice, setHookChoice] = useState<number | null>(null);
-  const [matchSelected, setMatchSelected] = useState<number | null>(null);
-  const [matched, setMatched] = useState<Record<number, string>>({});
-  const [matchWrong, setMatchWrong] = useState(false);
   const [marked, setMarked] = useState<string[]>([]);
   const [trapWrong, setTrapWrong] = useState(false);
   const [pollChoice, setPollChoice] = useState<number | null>(null);
@@ -374,6 +651,17 @@ export default function Lesson1Page() {
   const setField = (key: string, value: string) =>
     setData((prev) => ({ ...prev, [key]: value }));
 
+  // Mini quiz cevapları da yazılan diğer cevaplarla aynı yerde saklanır,
+  // böylece slayt değiştirilse bile cevap sıfırlanmaz.
+  const quizSelected = (key: string): number | null => {
+    const raw = data[key];
+    if (raw === undefined || raw === "") return null;
+    const parsed = Number.parseInt(raw, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+  const quizSet = (key: string, index: number | null) =>
+    setField(key, index === null ? "" : String(index));
+
   const doneCount = SLIDES.filter((s) => done[s.id]).length;
   const targetsFound = TRAP_SENTENCES.filter(
     (s) => s.target && marked.includes(s.id),
@@ -485,58 +773,14 @@ export default function Lesson1Page() {
           <Slide id="mikro-1-etkilesim" title="Hızlı düşünme — Dene">
             <h3 className="text-lg font-bold">Dene</h3>
             <p className="mt-2 text-zinc-700">Her durumu doğru düşünme türüyle eşleştir.</p>
-            <p className="mt-2 text-sm text-zinc-600">
-              Önce bir durumu seç, sonra “Hızlı düşünme” veya “Yavaş düşünme”
-              düğmesine bas. Sürükleme gerekmez.
-            </p>
-            <div className="mt-3 flex flex-col gap-2" role="group" aria-label="Eşleştirilecek durumlar">
-              {MATCH_PAIRS.map((pair, i) => (
-                <button
-                  key={pair.situation}
-                  type="button"
-                  aria-pressed={matchSelected === i}
-                  disabled={Boolean(matched[i])}
-                  onClick={() => setMatchSelected(i)}
-                  className={`min-h-11 rounded-lg border px-4 py-2 text-left ${
-                    matched[i] ? "border-stone-900 bg-zinc-50" : matchSelected === i ? "border-stone-900 bg-stone-900 text-white" : "border-zinc-300 bg-white"
-                  }`}
-                >
-                  {pair.situation}
-                  {matched[i] ? ` — ${matched[i]}` : ""}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 flex gap-2">
-              {(["Hızlı düşünme", "Yavaş düşünme"] as const).map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  disabled={matchSelected === null}
-                  onClick={() => {
-                    if (matchSelected === null) return;
-                    const pair = MATCH_PAIRS[matchSelected];
-                    if (pair.answer === cat) {
-                      const next = { ...matched, [matchSelected]: cat };
-                      setMatched(next);
-                      setMatchSelected(null);
-                      setMatchWrong(false);
-                      if (Object.keys(next).length === MATCH_PAIRS.length) completeSlide("mikro-1-etkilesim");
-                    } else {
-                      setMatchWrong(true);
-                      setMatchSelected(null);
-                    }
-                  }}
-                  className="inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-            {matchWrong && <Feedback kind="note">{MATCH_WRONG}</Feedback>}
-            {Object.keys(matched).length === MATCH_PAIRS.length && (
-              <Feedback kind="ok">{MATCH_CORRECT}</Feedback>
-            )}
-            <SingleQuiz quiz={MINI_QUIZ_1} title="Kısa soru" onCorrect={() => {}} />
+            <MatchingGame onComplete={() => completeSlide("mikro-1-etkilesim")} />
+            <SingleQuiz
+              quiz={MINI_QUIZ_1}
+              title="Kısa soru"
+              onCorrect={() => {}}
+              selected={quizSelected("mini-1")}
+              onSelect={(i) => quizSet("mini-1", i)}
+            />
           </Slide>
         );
       case 4:
@@ -553,33 +797,57 @@ export default function Lesson1Page() {
               Aşağıdaki kurgusal yorum akışını oku. Onay önyargısını besleyen
               cümleleri tıklayarak işaretle. İşaretlemen gereken 3 cümle var.
             </p>
-            <div className="mt-3 flex flex-col gap-2" role="group" aria-label="İşaretlenecek cümleler">
-              {TRAP_SENTENCES.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  aria-pressed={marked.includes(s.id)}
-                  onClick={() => {
-                    if (s.target) {
-                      if (!marked.includes(s.id)) {
-                        const next = [...marked, s.id];
-                        setMarked(next);
-                        setTrapWrong(false);
-                        if (TRAP_SENTENCES.filter((x) => x.target && next.includes(x.id)).length === 3) completeSlide("mikro-2-etkilesim");
+            <p className="mt-2 text-sm font-semibold text-stone-500">
+              Bulunan: {targetsFound} / 3
+            </p>
+            <div className="mt-3 flex flex-col gap-3" role="group" aria-label="İşaretlenecek cümleler">
+              {TRAP_SENTENCES.map((s) => {
+                const isMarked = marked.includes(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    aria-pressed={isMarked}
+                    onClick={() => {
+                      if (s.target) {
+                        if (isMarked) {
+                          setMarked(marked.filter((id) => id !== s.id));
+                        } else {
+                          const next = [...marked, s.id];
+                          setMarked(next);
+                          setTrapWrong(false);
+                          if (TRAP_SENTENCES.filter((x) => x.target && next.includes(x.id)).length === 3) completeSlide("mikro-2-etkilesim");
+                        }
+                      } else {
+                        setTrapWrong(true);
                       }
-                    } else {
-                      setTrapWrong(true);
-                    }
-                  }}
-                  className={`min-h-11 rounded-lg border px-4 py-2 text-left ${
-                    marked.includes(s.id) ? "border-stone-900 bg-zinc-50" : "border-zinc-300 bg-white"
-                  }`}
-                >
-                  <span className="text-sm text-zinc-600">{s.user}: </span>
-                  {s.text}
-                  {marked.includes(s.id) && s.target ? " — İşaretlendi" : ""}
-                </button>
-              ))}
+                    }}
+                    className={`flex min-h-16 items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition hover:shadow ${
+                      isMarked ? "border-stone-900 bg-stone-50" : "border-zinc-300 bg-white hover:border-stone-400"
+                    }`}
+                  >
+                    {isMarked ? (
+                      <Tick size="lg" />
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-zinc-300 bg-white text-zinc-400"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden="true">
+                          <path d="M4 10.5 8.5 15 16 5.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-zinc-600">{s.user}</span>
+                      <span className="mt-1 block leading-6">{s.text}</span>
+                      <span className={`mt-2 block text-sm font-bold ${isMarked ? "text-stone-900" : "text-zinc-500"}`}>
+                        {isMarked ? "✓ İşaretlendi — tekrar dokunursan kalkar" : "İşaretlemek için dokun"}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             {trapWrong && <Feedback kind="note">{TRAP_WRONG}</Feedback>}
             {targetsFound === 3 && (
@@ -590,7 +858,13 @@ export default function Lesson1Page() {
                 <Feedback kind="ok">{TRAP_COMPLETE}</Feedback>
               </div>
             )}
-            <SingleQuiz quiz={MINI_QUIZ_2} title="Kısa soru" onCorrect={() => {}} />
+            <SingleQuiz
+              quiz={MINI_QUIZ_2}
+              title="Kısa soru"
+              onCorrect={() => {}}
+              selected={quizSelected("mini-2")}
+              onSelect={(i) => quizSet("mini-2", i)}
+            />
           </Slide>
         );
       case 6:
@@ -607,7 +881,7 @@ export default function Lesson1Page() {
               Aşağıdaki kurgusal mesajı oku, sonra tahmin et: Bu mesajın devamında
               ne olacak?
             </p>
-            <blockquote className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 leading-7">
+            <blockquote className="mt-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 leading-7 shadow-sm">
               {POLL_MESSAGE}
             </blockquote>
             <p className="mt-3 font-semibold">Bu mesajın devamında büyük olasılıkla ne olur?</p>
@@ -615,14 +889,20 @@ export default function Lesson1Page() {
               options={POLL_OPTIONS}
               selected={pollChoice}
               onSelect={(i) => { setPollChoice(i); completeSlide("mikro-3-etkilesim"); }}
-              label="Tahmin anketi"
+              label="Tahmin"
             />
             {pollChoice !== null && (
               <Feedback kind="ok">
                 {POLL_EXPLANATION.map((p, i) => <p key={i} className="mt-2 first:mt-0">{p}</p>)}
               </Feedback>
             )}
-            <SingleQuiz quiz={MINI_QUIZ_3} title="Kısa soru" onCorrect={() => {}} />
+            <SingleQuiz
+              quiz={MINI_QUIZ_3}
+              title="Kısa soru"
+              onCorrect={() => {}}
+              selected={quizSelected("mini-3")}
+              onSelect={(i) => quizSet("mini-3", i)}
+            />
           </Slide>
         );
       case 8:
@@ -648,8 +928,9 @@ export default function Lesson1Page() {
                   const c = BRANCH_CHOICES.find((x) => x.id === branchChoice)!;
                   const triedAllNonBest = BRANCH_CHOICES.filter((x) => !x.isBest).every((x) => branchTried.includes(x.id));
                   return (
-                    <div>
-                      <p className="mt-3 font-semibold">Seçimin: {c.label}</p>
+                    <div className="mt-4 rounded-2xl border-2 border-stone-900 bg-stone-50 p-5 shadow-sm">
+                      <p className="text-sm font-bold text-stone-500">Sonuç</p>
+                      <p className="mt-2 font-semibold">Seçimin: {c.label}</p>
                       <p className="mt-2 leading-7">{c.result}</p>
                       <Feedback kind="note">{c.feedback}</Feedback>
                       {!c.isBest && (
@@ -708,7 +989,7 @@ export default function Lesson1Page() {
               options={REVERSE_TECHNIQUES}
               selected={REVERSE_TECHNIQUES.indexOf(data["tersine-teknik"] ?? "") >= 0 ? REVERSE_TECHNIQUES.indexOf(data["tersine-teknik"]!) : null}
               onSelect={(i) => setField("tersine-teknik", REVERSE_TECHNIQUES[i])}
-              label="Tersine yazma tekniği"
+              label="Teknik seçimi"
             />
             <Field label="2. Zayıf mesajını yaz (2–3 cümle)" value={data["tersine-metin"] ?? ""} onChange={(v) => setField("tersine-metin", v)} />
             <fieldset className="mt-4">
@@ -718,16 +999,27 @@ export default function Lesson1Page() {
                   const chosen = (data["tersine-tetikleyiciler"] ?? "").split(",").filter(Boolean);
                   const on = chosen.includes(t);
                   return (
-                    <label key={t} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-zinc-300 px-4">
+                    <label
+                    key={t}
+                    className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border-2 px-4 py-2 shadow-sm transition hover:shadow ${
+                      on ? "border-stone-900 bg-stone-50" : "border-zinc-300 bg-white hover:border-stone-400"
+                    }`}
+                  >
                       <input
                         type="checkbox"
+                        className="sr-only"
                         checked={on}
                         onChange={() => {
                           const next = on ? chosen.filter((x) => x !== t) : [...chosen, t];
                           setField("tersine-tetikleyiciler", next.join(","));
                         }}
                       />
-                      {t}
+                      {on ? (
+                        <Tick />
+                      ) : (
+                        <span aria-hidden="true" className="h-7 w-7 shrink-0 rounded-full border-2 border-zinc-300" />
+                      )}
+                      <span className="font-medium">{t}</span>
                     </label>
                   );
                 })}
@@ -793,8 +1085,10 @@ export default function Lesson1Page() {
                 <ChoiceButtons
                   options={EXIT_QUESTIONS[exitIndex].options}
                   selected={exitSelected}
+                  answerIndex={EXIT_QUESTIONS[exitIndex].answerIndex}
+                  showResult={exitSelected !== null}
                   onSelect={(i) => setExitSelected(i)}
-                  label={`Çıkış bileti soru ${exitIndex + 1}`}
+                  label={`Kısa kontrol soru ${exitIndex + 1}`}
                 />
                 {exitSelected !== null && (
                   <div>
@@ -829,8 +1123,9 @@ export default function Lesson1Page() {
                   <div>
                     <Feedback kind="note">{EXIT_SOME_WRONG}</Feedback>
                     {exitMissed.map((mi) => (
-                      <div key={mi} className="mt-4 rounded-lg border border-stone-900 bg-zinc-50 p-4">
-                        <h3 className="font-bold">{EXIT_QUESTIONS[mi].remedialTitle}</h3>
+                      <div key={mi} className="mt-4 rounded-2xl border-2 border-stone-900 bg-stone-50 p-5 shadow-sm">
+                        <p className="text-sm font-bold text-stone-500">Kısa tekrar</p>
+                        <h3 className="mt-1 font-bold">{EXIT_QUESTIONS[mi].remedialTitle}</h3>
                         <p className="mt-2 leading-7">{EXIT_QUESTIONS[mi].remedialText}</p>
                       </div>
                     ))}
@@ -899,25 +1194,31 @@ export default function Lesson1Page() {
               kalan soruyu görmek.
             </p>
             {RUBRIC_QUESTIONS.map((q, i) => (
-              <div key={q.name} className="mt-4">
-                <label htmlFor={`rubrik-${i}`} className="font-semibold">
+              <div key={q.name} className="mt-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                <p className="font-semibold">
                   {q.name} {q.detail}
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    id={`rubrik-${i}`}
-                    type="range"
-                    min={1}
-                    max={5}
-                    step={1}
-                    value={rubric[i] ?? 3}
-                    onChange={(e) => setRubric((prev) => ({ ...prev, [i]: Number(e.target.value) }))}
-                    className="w-full"
-                  />
-                  <span className="w-8 text-center font-semibold" aria-label={`${q.name} puanı`}>
-                    {rubric[i] ?? 3}
-                  </span>
+                </p>
+                <div className="mt-3 flex gap-2" role="group" aria-label={`${q.name} puanı`}>
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={rubric[i] === value}
+                      onClick={() => setRubric((prev) => ({ ...prev, [i]: value }))}
+                      className={`flex min-h-12 min-w-12 flex-1 items-center justify-center rounded-full border-2 text-base font-bold transition ${
+                        rubric[i] === value
+                          ? "border-stone-900 bg-stone-900 text-white"
+                          : "border-zinc-300 bg-white hover:border-stone-400"
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
                 </div>
+                <p className="mt-2 flex justify-between text-xs text-zinc-500">
+                  <span>1 — Zayıf</span>
+                  <span>5 — Güçlü</span>
+                </p>
               </div>
             ))}
             <button
