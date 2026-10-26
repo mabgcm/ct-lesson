@@ -179,11 +179,10 @@ const IMG = {
   friend: "/media-generation-arkadas-mesaji-0-365fed32-f766-409c-be73-0ecaa34fa954.png",
 };
 
-// Ders mesajlarının ekran görüntüsü: görselin kendisi + metni okuma seçeneği.
+// Ders mesajlarının ekran görüntüsü: tıklayınca ekranı kaplayan tam boyut görünüm.
 function MessageImage({
   src,
   alt,
-  lines,
   label,
 }: {
   src: string;
@@ -191,23 +190,61 @@ function MessageImage({
   lines: string[];
   label: string;
 }) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
   return (
-    <figure aria-label={label} className="overflow-hidden rounded-lg border border-mist-border bg-white shadow-sm">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} loading="lazy" className="mx-auto block w-full max-w-md" />
-      <figcaption className="border-t border-mist-border bg-chalk-canvas px-4 py-3">
-        <details>
-          <summary className="cursor-pointer text-sm font-semibold text-deep-indigo">
-            Görseldeki metni oku
-          </summary>
-          <div className="mt-2 space-y-1">
-            {lines.map((line, i) => (
-              <p key={i} className="text-sm leading-6">{line}</p>
-            ))}
-          </div>
-        </details>
-      </figcaption>
-    </figure>
+    <>
+      <figure aria-label={label} className="overflow-hidden rounded-lg border border-mist-border bg-white shadow-sm">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={`${label} — tam boyutta gör`}
+          className="block w-full cursor-zoom-in"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt={alt} loading="lazy" className="mx-auto block w-full max-w-md" />
+        </button>
+        <figcaption className="border-t border-mist-border bg-chalk-canvas px-4 py-2 text-center text-sm text-slate-veil">
+          Büyütmek için görsele dokun
+        </figcaption>
+      </figure>
+      {open && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={label}
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+        >
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Kapat"
+            className="absolute right-4 top-4 inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white text-xl font-bold"
+          >
+            ×
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={alt}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-full max-w-full rounded-lg object-contain"
+          />
+        </div>
+      )}
+    </>
   );
 }
 
