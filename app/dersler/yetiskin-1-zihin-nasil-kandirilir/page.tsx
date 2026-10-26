@@ -152,7 +152,7 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
   return (
     <div
       role="status"
-      className="mt-4 flex gap-3 rounded-full border border-iris-bolt bg-chalk-canvas p-4 leading-7 shadow-sm"
+      className="mt-4 flex gap-3 rounded-lg border border-iris-bolt bg-chalk-canvas p-4 leading-7 shadow-sm"
     >
       {kind === "ok" ? (
         <Tick />
@@ -753,21 +753,25 @@ function MatchingGame({
                   {placed.map(({ pair, i }) => (
                     <div
                       key={pair.situation}
-                      className="flex items-start gap-2 rounded-full border border-mist-border bg-white p-3 text-sm leading-6"
+                      className="rounded-lg border border-mist-border bg-white p-3 text-sm leading-6"
                     >
-                      <Tick />
-                      <span className="min-w-0 flex-1">{pair.situation}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const next = { ...matched };
-                          delete next[i];
-                          updateMatched(next);
-                        }}
-                        className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-mist-border px-3 text-xs font-semibold"
-                      >
-                        Geri al
-                      </button>
+                      <div className="flex items-start gap-2">
+                        <Tick />
+                        <span className="min-w-0 flex-1">{pair.situation}</span>
+                      </div>
+                      <div className="mt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = { ...matched };
+                            delete next[i];
+                            updateMatched(next);
+                          }}
+                          className="inline-flex min-h-11 items-center rounded-lg border border-mist-border px-3 text-xs font-semibold"
+                        >
+                          Geri al
+                        </button>
+                      </div>
                     </div>
                   ))}
                   {placed.length === 0 && (
@@ -793,7 +797,7 @@ function MatchingGame({
       {drag?.moved && (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed z-50 max-w-72 -translate-y-1/2 rounded-full bg-iris-bolt px-4 py-3 text-white shadow-xl"
+          className="pointer-events-none fixed z-50 max-w-72 -translate-y-1/2 rounded-lg bg-iris-bolt px-4 py-3 text-white shadow-xl"
           style={{ left: drag.x + 16, top: drag.y }}
         >
           {MATCH_PAIRS[drag.index].situation}
