@@ -30,24 +30,74 @@ const modes = [
   },
 ];
 
-const adultLessons = [
-  { title: "Zihin Nasıl Kandırılır?", status: "available" },
-  { title: "Argüman ve Safsatalar", status: "soon" },
-  { title: "Medya, Algoritma ve Yapay Zekâ", status: "soon" },
-  { title: "Satış ve Pazarlama Manipülasyonu", status: "soon" },
-  { title: "İş Yerinde Güç Oyunları", status: "soon" },
-  { title: "İlişkiler ve Sınır Koyma", status: "soon" },
-  { title: "Para ve Dolandırıcılık", status: "soon" },
-  { title: "Final: Kişisel Kalkan Planı", status: "soon" },
+const adultModules = [
+  {
+    title: "Modül 1: Zihin ve Düşünme",
+    body: "Zihnin nasıl çalıştığını ve sağlam bir argümanın nasıl kurulduğunu öğren.",
+    lessons: [
+      { title: "Zihin Nasıl Kandırılır?", status: "available" },
+      { title: "Argüman ve Safsatalar", status: "soon" },
+    ],
+  },
+  {
+    title: "Modül 2: Medya ve İkna",
+    body: "Ekranlarda ve satış mesajlarında ikna tekniğini tanı.",
+    lessons: [
+      { title: "Medya, Algoritma ve Yapay Zekâ", status: "soon" },
+      { title: "Satış ve Pazarlama Manipülasyonu", status: "soon" },
+    ],
+  },
+  {
+    title: "Modül 3: İnsanlar ve Güç",
+    body: "İş yerinde ve ilişkilerde baskıyı fark et, sınırını koru.",
+    lessons: [
+      { title: "İş Yerinde Güç Oyunları", status: "soon" },
+      { title: "İlişkiler ve Sınır Koyma", status: "soon" },
+    ],
+  },
+  {
+    title: "Modül 4: Para ve Kalkan",
+    body: "Para tuzaklarından korun ve kendi kalkan planını yaz.",
+    lessons: [
+      { title: "Para ve Dolandırıcılık", status: "soon" },
+      { title: "Final: Kişisel Kalkan Planı", status: "soon" },
+    ],
+  },
+  {
+    title: "İleri Modül: Güç Alanları",
+    body: "Yalnızca yetişkinlere yöneliktir, isteğe bağlıdır. Bu modül bir inancı veya görüşü yargılamaz, sadece mesajdaki tekniği inceler.",
+    lessons: [
+      { title: "Siyasi Manipülasyon", status: "soon" },
+      { title: "Dini ve Spiritüel Manipülasyon", status: "soon" },
+    ],
+  },
 ] as const;
 
-const teenLessons = [
-  "Beyin ve Baskı: FOMO, Beğenilme İsteği",
-  "Sosyal Medya ve Fenomenler",
-  "Akran Baskısı ve Hazır Cümleler",
-  "Oyun, Uygulama ve Alışveriş Tuzakları",
-  "Dedikodu, Dışlama ve Çevrimiçi Sınırlar",
-  "Kendi Pusulan: Değerler ve Karar Süzgeci",
+const teenModules = [
+  {
+    title: "Modül 1: Beyin ve Ekran",
+    body: "Beynin baskıya nasıl tepki verdiğini ve ekranların seni nasıl çektiğini gör.",
+    lessons: [
+      "Beyin ve Baskı: FOMO, Beğenilme İsteği",
+      "Sosyal Medya ve Fenomenler",
+    ],
+  },
+  {
+    title: "Modül 2: Baskı ve Tuzaklar",
+    body: "Akran baskısını ve oyun ile alışveriş tuzaklarını tanı.",
+    lessons: [
+      "Akran Baskısı ve Hazır Cümleler",
+      "Oyun, Uygulama ve Alışveriş Tuzakları",
+    ],
+  },
+  {
+    title: "Modül 3: Sınırlar ve Pusula",
+    body: "Dedikoduya ve dışlamaya karşı sınırını koy, kendi pusulanla karar ver.",
+    lessons: [
+      "Dedikodu, Dışlama ve Çevrimiçi Sınırlar",
+      "Kendi Pusulan: Değerler ve Karar Süzgeci",
+    ],
+  },
 ];
 
 export default function Home() {
@@ -161,62 +211,91 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Adult curriculum: study-set cards */}
+      {/* Adult curriculum: module cards */}
       <section aria-labelledby="yetiskin-baslik" className="mx-auto max-w-[1200px] px-4 py-20">
         <h2 id="yetiskin-baslik" className="text-2xl font-semibold">
-          Yetişkin müfredatı: 8 ders
+          Yetişkin müfredatı: 5 modül, 10 ders
         </h2>
-        <ol className="mt-4 grid gap-2 sm:grid-cols-2">
-          {adultLessons.map((lesson, index) => (
-            <li
-              key={lesson.title}
-              className="flex items-center justify-between gap-3 rounded-lg border border-mist-border bg-paper-white p-4 shadow-[rgba(40,46,62,0.1)_0px_4px_16px_0px]"
+        <p className="mt-2 max-w-2xl text-deep-indigo">
+          İlk 4 modül çekirdek kurstur. İleri modül çekirdekten sonra,
+          isteğe bağlı olarak gelir.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {adultModules.map((module, moduleIndex) => (
+            <article
+              key={module.title}
+              className="rounded-lg border border-mist-border bg-paper-white p-6 shadow-[rgba(40,46,62,0.1)_0px_4px_16px_0px]"
             >
-              <span>
-                <strong className="font-semibold">{index + 1}.</strong> {lesson.title}
-              </span>
-              {lesson.status === "available" ? (
-                <Link
-                  href={LESSON_PATH}
-                  className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-iris-bolt px-5 text-sm font-semibold text-white"
-                >
-                  Başla
-                </Link>
-              ) : (
-                <span className="shrink-0 rounded-full border border-mist-border px-3 py-1 text-sm text-slate-veil">
-                  Yakında
-                </span>
-              )}
-            </li>
+              <h3 className="text-xl font-semibold">{module.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-deep-indigo">{module.body}</p>
+              <ol className="mt-4 space-y-2">
+                {module.lessons.map((lesson, lessonIndex) => {
+                  const number = moduleIndex * 2 + lessonIndex + 1;
+                  return (
+                    <li
+                      key={lesson.title}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-mist-border bg-chalk-canvas p-3"
+                    >
+                      <span className="text-sm">
+                        <strong className="font-semibold">{number}.</strong> {lesson.title}
+                      </span>
+                      {lesson.status === "available" ? (
+                        <Link
+                          href={LESSON_PATH}
+                          className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-iris-bolt px-5 text-sm font-semibold text-white"
+                        >
+                          Başla
+                        </Link>
+                      ) : (
+                        <span className="shrink-0 rounded-full border border-mist-border bg-paper-white px-3 py-1 text-sm text-slate-veil">
+                          Yakında
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </article>
           ))}
-        </ol>
+        </div>
       </section>
 
-      {/* Teen curriculum: tinted section */}
+      {/* Teen curriculum: module cards, tinted section */}
       <section aria-labelledby="ergen-baslik" className="bg-lilac-wash py-20">
         <div className="mx-auto max-w-[1200px] px-4">
           <h2 id="ergen-baslik" className="text-2xl font-semibold">
-            Ergen müfredatı: 6 ders
+            Ergen müfredatı: 3 modül, 6 ders
           </h2>
           <p className="mt-2 max-w-2xl text-deep-indigo">
             Ergen versiyonu, beceri eğitimidir; terapi değildir. Dili saygılı
             sınır koyma ve sorarak karar verme çizgisindedir.
           </p>
-          <ol className="mt-4 grid gap-2 sm:grid-cols-2">
-            {teenLessons.map((title, index) => (
-              <li
-                key={title}
-                className="flex items-center justify-between gap-3 rounded-lg border border-mist-border bg-paper-white p-4"
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {teenModules.map((module, moduleIndex) => (
+              <article
+                key={module.title}
+                className="rounded-lg border border-mist-border bg-paper-white p-6"
               >
-                <span>
-                  <strong className="font-semibold">{index + 1}.</strong> {title}
-                </span>
-                <span className="shrink-0 rounded-full border border-mist-border px-3 py-1 text-sm text-slate-veil">
-                  Yakında
-                </span>
-              </li>
+                <h3 className="text-xl font-semibold">{module.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-deep-indigo">{module.body}</p>
+                <ol className="mt-4 space-y-2">
+                  {module.lessons.map((title, index) => (
+                    <li
+                      key={title}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-mist-border bg-chalk-canvas p-3"
+                    >
+                      <span className="text-sm">
+                        <strong className="font-semibold">{moduleIndex * 2 + index + 1}.</strong> {title}
+                      </span>
+                      <span className="shrink-0 rounded-full border border-mist-border bg-paper-white px-3 py-1 text-sm text-slate-veil">
+                        Yakında
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </article>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
