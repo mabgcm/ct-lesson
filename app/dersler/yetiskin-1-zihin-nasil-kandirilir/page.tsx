@@ -274,9 +274,17 @@ function SingleQuiz({
 
 const MATCH_CATEGORIES = ["Hızlı düşünme", "Yavaş düşünme"] as const;
 
-function MatchingGame({ onComplete }: { onComplete: () => void }) {
+function MatchingGame({
+  onComplete,
+  initialMatched,
+  onMatchedChange,
+}: {
+  onComplete: () => void;
+  initialMatched: Record<number, string>;
+  onMatchedChange: (next: Record<number, string>) => void;
+}) {
   const [selected, setSelected] = useState<number | null>(null);
-  const [matched, setMatched] = useState<Record<number, string>>({});
+  const [matched, setMatched] = useState<Record<number, string>>(initialMatched);
   const [wrong, setWrong] = useState(false);
   const [drag, setDrag] = useState<{
     index: number;
@@ -288,11 +296,16 @@ function MatchingGame({ onComplete }: { onComplete: () => void }) {
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const completedRef = useRef(false);
 
+  const updateMatched = (next: Record<number, string>) => {
+    setMatched(next);
+    onMatchedChange(next);
+  };
+
   const place = (index: number, category: string) => {
     const pair = MATCH_PAIRS[index];
     if (pair.answer === category) {
       const next = { ...matched, [index]: category };
-      setMatched(next);
+      updateMatched(next);
       setSelected(null);
       setWrong(false);
       if (Object.keys(next).length === MATCH_PAIRS.length && !completedRef.current) {
@@ -425,7 +438,7 @@ function MatchingGame({ onComplete }: { onComplete: () => void }) {
                         onClick={() => {
                           const next = { ...matched };
                           delete next[i];
-                          setMatched(next);
+                          updateMatched(next);
                         }}
                         className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-zinc-300 px-3 text-xs font-semibold"
                       >
@@ -662,6 +675,22 @@ export default function Lesson1Page() {
   const quizSet = (key: string, index: number | null) =>
     setField(key, index === null ? "" : String(index));
 
+  // Eşleştirme yerleşimleri de aynı depoda tutulur; slayttan çıkıp
+  // dönüldüğünde yerleşimler sıfırlanmaz.
+  const savedMatched = (() => {
+    try {
+      const parsed = JSON.parse(data["eslestirme"] ?? "{}") as Record<string, string>;
+      const out: Record<number, string> = {};
+      for (const [k, v] of Object.entries(parsed)) {
+        const n = Number.parseInt(k, 10);
+        if (!Number.isNaN(n) && typeof v === "string") out[n] = v;
+      }
+      return out;
+    } catch {
+      return {};
+    }
+  })();
+
   const doneCount = SLIDES.filter((s) => done[s.id]).length;
   const targetsFound = TRAP_SENTENCES.filter(
     (s) => s.target && marked.includes(s.id),
@@ -773,7 +802,11 @@ export default function Lesson1Page() {
           <Slide id="mikro-1-etkilesim" title="Hızlı düşünme — Dene">
             <h3 className="text-lg font-bold">Dene</h3>
             <p className="mt-2 text-zinc-700">Her durumu doğru düşünme türüyle eşleştir.</p>
-            <MatchingGame onComplete={() => completeSlide("mikro-1-etkilesim")} />
+            <MatchingGame
+              onComplete={() => completeSlide("mikro-1-etkilesim")}
+              initialMatched={savedMatched}
+              onMatchedChange={(next) => setField("eslestirme", JSON.stringify(next))}
+            />
             <SingleQuiz
               quiz={MINI_QUIZ_1}
               title="Kısa soru"
