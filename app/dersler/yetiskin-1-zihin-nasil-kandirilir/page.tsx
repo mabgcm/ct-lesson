@@ -131,7 +131,7 @@ function Tick({ size = "md" }: { size?: "md" | "lg" }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex shrink-0 items-center justify-center rounded-full bg-stone-900 text-white ${
+      className={`flex shrink-0 items-center justify-center rounded-full bg-iris-bolt text-white ${
         size === "lg" ? "h-9 w-9" : "h-7 w-7"
       }`}
     >
@@ -152,14 +152,14 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
   return (
     <div
       role="status"
-      className="mt-4 flex gap-3 rounded-2xl border border-stone-900 bg-zinc-50 p-4 leading-7 shadow-sm"
+      className="mt-4 flex gap-3 rounded-full border border-iris-bolt bg-chalk-canvas p-4 leading-7 shadow-sm"
     >
       {kind === "ok" ? (
         <Tick />
       ) : (
         <span
           aria-hidden="true"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-stone-900 font-bold"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-iris-bolt font-bold"
         >
           !
         </span>
@@ -168,6 +168,102 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
         <p className="font-semibold">{kind === "ok" ? "Doğru:" : "Not:"}</p>
         <div>{children}</div>
       </div>
+    </div>
+  );
+}
+
+function FlashcardDeck({
+  cards,
+  label,
+}: {
+  cards: { front: string; back: string }[];
+  label: string;
+}) {
+  const [order, setOrder] = useState<number[]>(cards.map((_, i) => i));
+  const [index, setIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState<Record<number, boolean>>({});
+  const current = order[index];
+  const card = cards[current];
+  const knownCount = Object.values(known).filter(Boolean).length;
+  const shuffle = () => {
+    const next = [...order];
+    for (let i = next.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [next[i], next[j]] = [next[j], next[i]];
+    }
+    setOrder(next);
+    setIndex(0);
+    setFlipped(false);
+  };
+  return (
+    <div className="mt-5" role="group" aria-label={label}>
+      <p className="inline-flex items-center rounded-full bg-iris-bolt px-3 py-1 text-xs font-semibold text-white">
+        Kartlar
+      </p>
+      <button
+        type="button"
+        onClick={() => setFlipped((v) => !v)}
+        aria-label={flipped ? "Kartın ön yüzünü göster" : "Kartı çevir"}
+        className="mt-3 flex min-h-56 w-full flex-col items-center justify-center rounded-lg border border-mist-border bg-white p-6 text-center shadow-[rgba(40,46,62,0.1)_0px_4px_16px_0px]"
+      >
+        <span className="text-xs font-semibold text-slate-veil">
+          {flipped ? "Cevap" : "Kart"}
+        </span>
+        <span className="mt-3 text-xl font-semibold leading-8 text-ink-charcoal">
+          {flipped ? card.back : card.front}
+        </span>
+        <span className="mt-4 text-sm text-slate-veil">Çevirmek için karta dokun</span>
+      </button>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          disabled={index === 0}
+          onClick={() => { setIndex(index - 1); setFlipped(false); }}
+          className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-mist-border bg-white px-4 text-sm font-semibold disabled:opacity-40"
+        >
+          ← Önceki
+        </button>
+        <span className="shrink-0 text-sm font-semibold text-slate-veil">
+          {index + 1} / {cards.length}
+        </span>
+        <button
+          type="button"
+          disabled={index === cards.length - 1}
+          onClick={() => { setIndex(index + 1); setFlipped(false); }}
+          className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-mist-border bg-white px-4 text-sm font-semibold disabled:opacity-40"
+        >
+          Sonraki →
+        </button>
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={shuffle}
+          className="inline-flex min-h-11 items-center rounded-full border border-mist-border bg-white px-4 text-sm font-semibold"
+        >
+          Karıştır
+        </button>
+        <span className="text-sm text-slate-veil">Bildim: {knownCount} / {cards.length}</span>
+      </div>
+      {flipped && (
+        <div className="mt-3 flex gap-3">
+          <button
+            type="button"
+            onClick={() => setKnown((prev) => ({ ...prev, [current]: true }))}
+            className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
+          >
+            <Tick /> Bildim
+          </button>
+          <button
+            type="button"
+            onClick={() => setKnown((prev) => ({ ...prev, [current]: false }))}
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-mist-border bg-white px-4 text-sm font-semibold"
+          >
+            Tekrar çalış
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -183,10 +279,10 @@ function Slide({
 }) {
   return (
     <section id={id} aria-labelledby={`${id}-baslik`}>
-      <h1 id={`${id}-baslik`} className="text-3xl font-bold leading-snug">
+      <h1 id={`${id}-baslik`} className="text-3xl font-semibold leading-snug">
         {title}
       </h1>
-      <div className="mt-6 space-y-5 leading-8 text-zinc-800">{children}</div>
+      <div className="mt-6 space-y-5 leading-8 text-ink-charcoal">{children}</div>
     </section>
   );
 }
@@ -220,26 +316,26 @@ function ChoiceButtons({
             type="button"
             aria-pressed={isSelected}
             onClick={() => onSelect(index)}
-            className={`flex min-h-14 items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left text-base shadow-sm transition hover:shadow ${
+            className={`flex min-h-14 items-start gap-3 rounded-lg border-2 px-4 py-3 text-left text-base shadow-sm transition hover:shadow ${
               isCorrect
-                ? "border-emerald-700 bg-emerald-50"
+                ? "border-iris-bolt bg-lilac-wash"
                 : isWrongSelected
-                  ? "border-red-300 bg-red-50"
+                  ? "border-mist-border bg-white"
                   : isSelected
-                    ? "border-stone-900 bg-stone-900 text-white"
-                    : "border-zinc-300 bg-white hover:border-stone-400"
+                    ? "border-iris-bolt bg-iris-bolt text-white"
+                    : "border-mist-border bg-white hover:border-fog-mist"
             }`}
           >
             <span
               aria-hidden="true"
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 font-bold ${
                 isCorrect
-                  ? "border-emerald-700 bg-emerald-700 text-white"
+                  ? "border-iris-bolt bg-iris-bolt text-white"
                   : isWrongSelected
-                    ? "border-red-400 bg-white text-red-700"
+                    ? "border-mist-border bg-white text-ink-charcoal"
                     : isSelected
-                      ? "border-white bg-white text-stone-900"
-                      : "border-zinc-300 bg-stone-100 text-stone-700"
+                      ? "border-white bg-white text-ink-charcoal"
+                      : "border-mist-border bg-chalk-canvas text-deep-indigo"
               }`}
             >
               {letter}
@@ -253,7 +349,7 @@ function ChoiceButtons({
             {isWrongSelected && (
               <span
                 aria-hidden="true"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold text-red-700"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-chalk-canvas font-bold text-ink-charcoal"
               >
                 ✕
               </span>
@@ -281,11 +377,11 @@ function SingleQuiz({
   const answered = selected !== null;
   const correct = selected === quiz.answerIndex;
   return (
-    <div className="mt-8 rounded-2xl border border-zinc-200 bg-stone-50 p-5 shadow-sm">
-      <p className="inline-flex items-center rounded-full bg-stone-900 px-3 py-1 text-xs font-bold text-white">
-        {title}
+    <div className="mt-8 rounded-lg border border-mist-border bg-chalk-canvas p-5 shadow-sm">
+      <p className="inline-flex items-center rounded-full bg-iris-bolt px-3 py-1 text-xs font-semibold text-white">
+        Öğren
       </p>
-      <p className="mt-3 text-zinc-700">
+      <p className="mt-3 text-deep-indigo">
         Az önce okuduğun kısım hakkında tek soru.
       </p>
       <p className="mt-3 text-lg font-semibold leading-7">{quiz.question}</p>
@@ -300,14 +396,35 @@ function SingleQuiz({
         }}
         label={title}
       />
-      {answered && correct && <Feedback kind="ok">{quiz.correctFeedback}</Feedback>}
-      {answered && !correct && (
+      {!answered && (
+        <button
+          type="button"
+          onClick={() => onSelect(-1)}
+          className="mt-4 inline-flex min-h-11 items-center rounded-full border border-mist-border bg-white px-5 text-sm font-semibold text-iris-bolt"
+        >
+          Bilmiyorum
+        </button>
+      )}
+      {selected === -1 && (
+        <div>
+          <Feedback kind="note">{quiz.correctFeedback}</Feedback>
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            className="mt-4 inline-flex min-h-11 items-center rounded-full border-2 border-iris-bolt bg-white px-5 text-sm font-semibold"
+          >
+            Tekrar dene
+          </button>
+        </div>
+      )}
+      {answered && selected !== -1 && correct && <Feedback kind="ok">{quiz.correctFeedback}</Feedback>}
+      {answered && selected !== -1 && !correct && (
         <div>
           <Feedback kind="note">{quiz.wrongFeedback}</Feedback>
           <button
             type="button"
             onClick={() => onSelect(null)}
-            className="mt-4 inline-flex min-h-12 items-center rounded-xl border-2 border-stone-900 bg-white px-5 text-sm font-semibold"
+            className="mt-4 inline-flex min-h-12 items-center rounded-xl border-2 border-iris-bolt bg-white px-5 text-sm font-semibold"
           >
             Tekrar dene
           </button>
@@ -338,9 +455,9 @@ function QuickCheck({
   const answered = selected !== null;
   const correct = selected === answerIndex;
   return (
-    <div className="mt-8 rounded-2xl border border-zinc-200 bg-stone-50 p-5 shadow-sm">
-      <p className="inline-flex items-center rounded-full bg-stone-900 px-3 py-1 text-xs font-bold text-white">
-        Kısa soru
+    <div className="mt-8 rounded-lg border border-mist-border bg-chalk-canvas p-5 shadow-sm">
+      <p className="inline-flex items-center rounded-full bg-iris-bolt px-3 py-1 text-xs font-semibold text-white">
+        Öğren
       </p>
       <p className="mt-3 text-lg font-semibold leading-7">{question}</p>
       <ChoiceButtons
@@ -351,14 +468,35 @@ function QuickCheck({
         onSelect={(i) => onSelect(i)}
         label="Kısa soru"
       />
-      {answered && correct && <Feedback kind="ok">{correctFeedback}</Feedback>}
-      {answered && !correct && (
+      {!answered && (
+        <button
+          type="button"
+          onClick={() => onSelect(-1)}
+          className="mt-4 inline-flex min-h-11 items-center rounded-full border border-mist-border bg-white px-5 text-sm font-semibold text-iris-bolt"
+        >
+          Bilmiyorum
+        </button>
+      )}
+      {selected === -1 && (
+        <div>
+          <Feedback kind="note">{correctFeedback}</Feedback>
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            className="mt-4 inline-flex min-h-11 items-center rounded-full border-2 border-iris-bolt bg-white px-5 text-sm font-semibold"
+          >
+            Tekrar dene
+          </button>
+        </div>
+      )}
+      {answered && selected !== -1 && correct && <Feedback kind="ok">{correctFeedback}</Feedback>}
+      {answered && selected !== -1 && !correct && (
         <div>
           <Feedback kind="note">{wrongFeedback}</Feedback>
           <button
             type="button"
             onClick={() => onSelect(null)}
-            className="mt-4 inline-flex min-h-12 items-center rounded-xl border-2 border-stone-900 bg-white px-5 text-sm font-semibold"
+            className="mt-4 inline-flex min-h-12 items-center rounded-xl border-2 border-iris-bolt bg-white px-5 text-sm font-semibold"
           >
             Tekrar dene
           </button>
@@ -389,6 +527,32 @@ function MatchingGame({
     moved: boolean;
   } | null>(null);
   const [hoverCategory, setHoverCategory] = useState<string | null>(null);
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [best, setBest] = useState<number | null>(null);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("zihin-kalkani-eslestirme-en-iyi-sure");
+      if (raw) setBest(Number.parseInt(raw, 10));
+    } catch { /* yoksay */ }
+  }, []);
+  const allMatched = Object.keys(matched).length === MATCH_PAIRS.length;
+  useEffect(() => {
+    if (!running || allMatched) return;
+    const id = window.setInterval(() => setSeconds((v) => v + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [running, allMatched]);
+  useEffect(() => {
+    if (!allMatched || seconds === 0) return;
+    if (best === null || seconds < best) {
+      setBest(seconds);
+      try {
+        window.localStorage.setItem("zihin-kalkani-eslestirme-en-iyi-sure", String(seconds));
+      } catch { /* yoksay */ }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allMatched]);
+  const fmt = (v: number) => `${Math.floor(v / 60)}:${String(v % 60).padStart(2, "0")}`;
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const completedRef = useRef(false);
 
@@ -400,6 +564,7 @@ function MatchingGame({
   const place = (index: number, category: string) => {
     const pair = MATCH_PAIRS[index];
     if (pair.answer === category) {
+      setRunning(true);
       const next = { ...matched, [index]: category };
       updateMatched(next);
       setSelected(null);
@@ -453,14 +618,20 @@ function MatchingGame({
 
   return (
     <div>
-      <p className="mt-2 text-zinc-700">
-        Bir durumu tutup doğru kutuya sürükle. Sürükleyemezsen kartı seç, sonra
-        kutunun altındaki düğmeye dokun.
+      <p className="inline-flex items-center rounded-full bg-iris-bolt px-3 py-1 text-xs font-semibold text-white">
+        Eşleştir
       </p>
-      <div className="mt-5 grid gap-5 sm:grid-cols-2">
+      <p className="mt-3 text-sm font-semibold text-slate-veil">
+        Süre: {fmt(seconds)}{best !== null ? ` · En iyi süre: ${fmt(best)}` : ""}
+      </p>
+      <p className="mt-2 text-deep-indigo">
+        Bir durumu tutup doğru kutuya sürükle. Sürükleyemezsen kartı seç, sonra
+        kutunun altındaki düğmeye dokun. Yanlış eşleşme süre cezası vermez; yalnızca ipucu gösterir.
+      </p>
+      <div className="mt-5">
         <div>
-          <p className="text-sm font-bold text-stone-500">Durumlar</p>
-          <div className="mt-3 flex flex-col gap-3" role="group" aria-label="Eşleştirilecek durumlar">
+          <p className="text-sm font-bold text-slate-veil">Durumlar</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2" role="group" aria-label="Eşleştirilecek durumlar">
             {unmatched.map(({ pair, i }) => (
               <div
                 key={pair.situation}
@@ -478,12 +649,12 @@ function MatchingGame({
                     setSelected((cur) => (cur === i ? null : i));
                   }
                 }}
-                className={`flex min-h-14 cursor-grab touch-none items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left leading-6 shadow-sm transition active:cursor-grabbing ${
+                className={`flex min-h-14 cursor-grab touch-none items-center gap-3 rounded-lg border-2 px-4 py-3 text-left leading-6 shadow-sm transition active:cursor-grabbing ${
                   drag?.index === i && drag.moved
                     ? "opacity-40"
                     : selected === i
-                      ? "border-stone-900 bg-stone-900 text-white"
-                      : "border-zinc-300 bg-white hover:border-stone-400"
+                      ? "border-iris-bolt bg-iris-bolt text-white"
+                      : "border-mist-border bg-white hover:border-fog-mist"
                 }`}
               >
                 <span aria-hidden="true" className="shrink-0 text-lg leading-none opacity-60">
@@ -493,13 +664,13 @@ function MatchingGame({
               </div>
             ))}
             {unmatched.length === 0 && (
-              <p className="rounded-2xl border border-zinc-200 bg-stone-50 p-4 text-zinc-600">
+              <p className="rounded-lg border border-mist-border bg-chalk-canvas p-4 text-slate-veil">
                 Tüm durumlar yerleştirildi.
               </p>
             )}
           </div>
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {MATCH_CATEGORIES.map((cat) => {
             const placed = MATCH_PAIRS.map((pair, i) => ({ pair, i })).filter(
               ({ i }) => matched[i] === cat,
@@ -509,15 +680,15 @@ function MatchingGame({
               <div
                 key={cat}
                 data-drop-category={cat}
-                className={`min-h-40 rounded-2xl border-2 p-4 transition ${
+                className={`min-h-40 rounded-lg border-2 p-4 transition ${
                   isHover
-                    ? "border-stone-900 bg-stone-100 shadow-md"
-                    : "border-dashed border-zinc-300 bg-stone-50"
+                    ? "border-iris-bolt bg-chalk-canvas shadow-md"
+                    : "border-dashed border-mist-border bg-chalk-canvas"
                 }`}
               >
                 <p className="flex items-center justify-between font-bold">
                   {cat}
-                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-stone-500">
+                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-veil">
                     {placed.length} yerleşti
                   </span>
                 </p>
@@ -525,7 +696,7 @@ function MatchingGame({
                   {placed.map(({ pair, i }) => (
                     <div
                       key={pair.situation}
-                      className="flex items-start gap-2 rounded-xl border border-zinc-200 bg-white p-3 text-sm leading-6"
+                      className="flex items-start gap-2 rounded-full border border-mist-border bg-white p-3 text-sm leading-6"
                     >
                       <Tick />
                       <span className="min-w-0 flex-1">{pair.situation}</span>
@@ -536,14 +707,14 @@ function MatchingGame({
                           delete next[i];
                           updateMatched(next);
                         }}
-                        className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-zinc-300 px-3 text-xs font-semibold"
+                        className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-mist-border px-3 text-xs font-semibold"
                       >
                         Geri al
                       </button>
                     </div>
                   ))}
                   {placed.length === 0 && (
-                    <p className="rounded-xl bg-white p-3 text-sm text-zinc-500">
+                    <p className="rounded-xl bg-white p-3 text-sm text-slate-veil">
                       Buraya sürükleyip bırak.
                     </p>
                   )}
@@ -552,7 +723,7 @@ function MatchingGame({
                   <button
                     type="button"
                     onClick={() => place(selected, cat)}
-                    className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white"
+                    className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
                   >
                     Seçili durumu buraya yerleştir
                   </button>
@@ -565,7 +736,7 @@ function MatchingGame({
       {drag?.moved && (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed z-50 max-w-72 -translate-y-1/2 rounded-2xl bg-stone-900 px-4 py-3 text-white shadow-xl"
+          className="pointer-events-none fixed z-50 max-w-72 -translate-y-1/2 rounded-full bg-iris-bolt px-4 py-3 text-white shadow-xl"
           style={{ left: drag.x + 16, top: drag.y }}
         >
           {MATCH_PAIRS[drag.index].situation}
@@ -583,13 +754,13 @@ function MicroLessonBlock({ lesson }: { lesson: MicroLesson }) {
   return (
     <div>
       {lesson.paragraphs.map((p, i) => (
-        <p key={i} className="mt-3 leading-7 text-zinc-800">
+        <p key={i} className="mt-3 leading-7 text-ink-charcoal">
           {p}
         </p>
       ))}
-      <figure className="mt-5 rounded-2xl border border-zinc-200 bg-stone-50 p-5 shadow-sm">
+      <figure className="mt-5 rounded-lg border border-mist-border bg-chalk-canvas p-5 shadow-sm">
         <figcaption className="font-semibold">{lesson.diagramTitle}</figcaption>
-        <p className="mt-2 leading-7 text-zinc-700">{lesson.diagram}</p>
+        <p className="mt-2 leading-7 text-deep-indigo">{lesson.diagram}</p>
       </figure>
     </div>
   );
@@ -612,13 +783,13 @@ function Field({
       <label htmlFor={id} className="font-semibold">
         {label}
       </label>
-      {hint && <p className="text-sm text-zinc-600">{hint}</p>}
+      {hint && <p className="text-sm text-slate-veil">{hint}</p>}
       <textarea
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="mt-2 w-full rounded-xl border-2 border-zinc-300 bg-white p-4 text-base outline-none transition focus:border-stone-900 focus:ring-2 focus:ring-stone-200"
+        className="mt-2 w-full rounded border-2 border-mist-border bg-white p-4 text-base outline-none transition focus:border-iris-bolt focus:ring-2 focus:ring-lilac-wash"
       />
     </div>
   );
@@ -814,12 +985,12 @@ export default function Lesson1Page() {
   // ekranı göstermez. Kaydetme etkileri `loaded` olmadan çalışmaz, bu
   // yüzden varsayılan durum depolanmış ilerlemenin üzerine yazılmaz.
   const nav = (
-    <div className="mt-10 flex items-center justify-between gap-3 border-t border-stone-200 pt-6">
+    <div className="mt-10 flex items-center justify-between gap-3 border-t border-mist-border pt-6">
       <button
         type="button"
         disabled={currentSlide === 0}
         onClick={() => goTo(currentSlide - 1)}
-        className="inline-flex min-h-12 items-center rounded-xl border border-stone-300 bg-white px-5 text-sm font-semibold disabled:opacity-40"
+        className="inline-flex min-h-12 items-center rounded-full border border-mist-border bg-white px-5 text-sm font-semibold disabled:opacity-40"
       >
         ← Önceki
       </button>
@@ -827,7 +998,7 @@ export default function Lesson1Page() {
         type="button"
         disabled={currentSlide === SLIDES.length - 1}
         onClick={() => goTo(currentSlide + 1)}
-        className="inline-flex min-h-12 items-center rounded-xl bg-stone-900 px-5 text-sm font-semibold text-white disabled:opacity-40"
+        className="inline-flex min-h-12 items-center rounded-full bg-iris-bolt px-5 text-sm font-semibold text-white disabled:opacity-40"
       >
         Sonraki →
       </button>
@@ -838,12 +1009,12 @@ export default function Lesson1Page() {
     const slideId = SLIDES[currentSlide].id;
     const paras = (list: string[], from: number, to: number) =>
       list.slice(from, to).map((p, i) => (
-        <p key={i} className="mt-3 leading-7 text-zinc-800 first:mt-0">{p}</p>
+        <p key={i} className="mt-3 leading-7 text-ink-charcoal first:mt-0">{p}</p>
       ));
     const diagram = (lesson: MicroLesson) => (
-      <figure className="mt-5 rounded-2xl border border-zinc-200 bg-stone-50 p-5 shadow-sm">
+      <figure className="mt-5 rounded-lg border border-mist-border bg-chalk-canvas p-5 shadow-sm">
         <figcaption className="font-semibold">{lesson.diagramTitle}</figcaption>
-        <p className="mt-2 leading-7 text-zinc-700">{lesson.diagram}</p>
+        <p className="mt-2 leading-7 text-deep-indigo">{lesson.diagram}</p>
       </figure>
     );
     const quick = (
@@ -896,14 +1067,11 @@ export default function Lesson1Page() {
       case "farket":
         return (
           <Slide id="farket" title="FARK ET">
-            <p className="text-zinc-700">Her karara aynı 6 adımla bakacağız.</p>
-            <ol className="mt-3 space-y-2">
-              {FARK_ET.map((s) => (
-                <li key={s.letter} className="rounded-lg border border-zinc-200 p-3">
-                  <strong>{s.letter} — {s.name}:</strong> {s.question}
-                </li>
-              ))}
-            </ol>
+            <p className="text-deep-indigo">Her karara aynı 6 adımla bakacağız.</p>
+            <FlashcardDeck
+              label="FARK ET kartları"
+              cards={FARK_ET.map((s) => ({ front: `${s.letter} — ${s.name}`, back: s.question }))}
+            />
             {quick(
               "peki-farket",
               "“Bu mesaj benden tam olarak ne istiyor?” hangi adımdır?",
@@ -917,9 +1085,17 @@ export default function Lesson1Page() {
       case "hedefler":
         return (
           <Slide id="hedefler" title="Bu derste ne öğreneceksin">
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-zinc-700">
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-deep-indigo">
               {OBJECTIVES.map((o) => <li key={o}>{o}</li>)}
             </ul>
+            <FlashcardDeck
+              label="Teknik kartları"
+              cards={[
+                { front: "Hızlı düşünme", back: MICRO_1.diagram },
+                { front: "Onay önyargısı", back: MICRO_2.diagram },
+                { front: "Duygu tuzağı", back: MICRO_3.diagram },
+              ]}
+            />
             {quick(
               "peki-hedef",
               "Acele bir kararda söyleyeceğin cümle ne?",
@@ -933,12 +1109,12 @@ export default function Lesson1Page() {
       case "kanca":
         return (
           <Slide id="kanca" title="İlk mesaj">
-            <p className="text-zinc-700">Önce mesajı oku, sonra ilk tepkini seç.</p>
-            <div className="mt-3 rounded-lg border border-stone-900 p-4" aria-label="Kurgusal indirim mesajı örneği">
+            <p className="text-deep-indigo">Önce mesajı oku, sonra ilk tepkini seç.</p>
+            <div className="mt-3 rounded-full border border-iris-bolt p-4" aria-label="Kurgusal indirim mesajı örneği">
               {HOOK_MESSAGE.map((line, i) => (
                 <p key={i} className={i === 0 ? "font-bold" : "mt-1"}>{line}</p>
               ))}
-              <p className="mt-3 inline-block rounded-lg bg-stone-900 px-4 py-2 font-semibold text-white">
+              <p className="mt-3 inline-block rounded-full bg-iris-bolt px-4 py-2 font-semibold text-white">
                 ŞİMDİ SATIN AL
               </p>
             </div>
@@ -999,7 +1175,7 @@ export default function Lesson1Page() {
         return (
           <Slide id="mikro-1-eslestirme" title="Hızlı düşünme — Dene">
             <h3 className="text-lg font-bold">Dene</h3>
-            <p className="mt-2 text-zinc-700">Her durumu doğru düşünme türüyle eşleştir.</p>
+            <p className="mt-2 text-deep-indigo">Her durumu doğru düşünme türüyle eşleştir.</p>
             <MatchingGame
               onComplete={() => completeSlide("mikro-1-eslestirme")}
               initialMatched={savedMatched}
@@ -1066,8 +1242,8 @@ export default function Lesson1Page() {
         return (
           <Slide id="mikro-2-tuzak" title="Onay önyargısı — Dene">
             <h3 className="text-lg font-bold">Dene</h3>
-            <p className="mt-2 text-zinc-700">Onay önyargısını besleyen 3 cümleyi işaretle.</p>
-            <p className="mt-2 text-sm font-semibold text-stone-500">
+            <p className="mt-2 text-deep-indigo">Onay önyargısını besleyen 3 cümleyi işaretle.</p>
+            <p className="mt-2 text-sm font-semibold text-slate-veil">
               Bulunan: {targetsFound} / 3
             </p>
             <div className="mt-3 flex flex-col gap-3" role="group" aria-label="İşaretlenecek cümleler">
@@ -1092,8 +1268,8 @@ export default function Lesson1Page() {
                         setTrapWrong(true);
                       }
                     }}
-                    className={`flex min-h-16 items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left shadow-sm transition hover:shadow ${
-                      isMarked ? "border-stone-900 bg-stone-50" : "border-zinc-300 bg-white hover:border-stone-400"
+                    className={`flex min-h-16 items-start gap-3 rounded-lg border-2 px-4 py-3 text-left shadow-sm transition hover:shadow ${
+                      isMarked ? "border-iris-bolt bg-chalk-canvas" : "border-mist-border bg-white hover:border-fog-mist"
                     }`}
                   >
                     {isMarked ? (
@@ -1101,7 +1277,7 @@ export default function Lesson1Page() {
                     ) : (
                       <span
                         aria-hidden="true"
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-zinc-300 bg-white text-zinc-400"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-mist-border bg-white text-fog-mist"
                       >
                         <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4" aria-hidden="true">
                           <path d="M4 10.5 8.5 15 16 5.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -1109,9 +1285,9 @@ export default function Lesson1Page() {
                       </span>
                     )}
                     <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-zinc-600">{s.user}</span>
+                      <span className="block text-sm font-semibold text-slate-veil">{s.user}</span>
                       <span className="mt-1 block leading-6">{s.text}</span>
-                      <span className={`mt-2 block text-sm font-bold ${isMarked ? "text-stone-900" : "text-zinc-500"}`}>
+                      <span className={`mt-2 block text-sm font-bold ${isMarked ? "text-ink-charcoal" : "text-slate-veil"}`}>
                         {isMarked ? "✓ İşaretlendi — tekrar dokunursan kalkar" : "İşaretlemek için dokun"}
                       </span>
                     </span>
@@ -1189,8 +1365,8 @@ export default function Lesson1Page() {
         return (
           <Slide id="mikro-3-tahmin" title="Duygu tuzağı — Dene">
             <h3 className="text-lg font-bold">Dene</h3>
-            <p className="mt-2 text-zinc-700">Mesajı oku:</p>
-            <blockquote className="mt-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 leading-7 shadow-sm">
+            <p className="mt-2 text-deep-indigo">Mesajı oku:</p>
+            <blockquote className="mt-3 rounded-lg border border-mist-border bg-chalk-canvas p-5 leading-7 shadow-sm">
               {POLL_MESSAGE}
             </blockquote>
             <p className="mt-3 font-semibold">Bu mesajın devamında büyük olasılıkla ne olur?</p>
@@ -1236,7 +1412,7 @@ export default function Lesson1Page() {
       case "senaryo-2":
         return (
           <Slide id="senaryo-2" title="Seçim yap">
-            <p className="leading-7 text-zinc-800">{SCENARIO_TEXT[3]}</p>
+            <p className="leading-7 text-ink-charcoal">{SCENARIO_TEXT[3]}</p>
             {branchChoice === null ? (
               <ChoiceButtons
                 options={BRANCH_CHOICES.map((c) => c.label)}
@@ -1254,8 +1430,8 @@ export default function Lesson1Page() {
                   const c = BRANCH_CHOICES.find((x) => x.id === branchChoice)!;
                   const triedAllNonBest = BRANCH_CHOICES.filter((x) => !x.isBest).every((x) => branchTried.includes(x.id));
                   return (
-                    <div className="mt-4 rounded-2xl border-2 border-stone-900 bg-stone-50 p-5 shadow-sm">
-                      <p className="text-sm font-bold text-stone-500">Sonuç</p>
+                    <div className="mt-4 rounded-lg border-2 border-iris-bolt bg-chalk-canvas p-5 shadow-sm">
+                      <p className="text-sm font-bold text-slate-veil">Sonuç</p>
                       <p className="mt-2 font-semibold">Seçimin: {c.label}</p>
                       <p className="mt-2 leading-7">{c.result}</p>
                       <Feedback kind="note">{c.feedback}</Feedback>
@@ -1263,7 +1439,7 @@ export default function Lesson1Page() {
                         <button
                           type="button"
                           onClick={() => setBranchChoice(null)}
-                          className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
+                          className="mt-3 inline-flex min-h-11 items-center rounded-full border border-iris-bolt px-4 text-sm font-semibold"
                         >
                           Farklı bir seçim dene
                         </button>
@@ -1274,7 +1450,7 @@ export default function Lesson1Page() {
                           <button
                             type="button"
                             onClick={() => completeSlide("senaryo-2")}
-                            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+                            className="mt-3 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
                           >
                             Devam et
                           </button>
@@ -1286,7 +1462,7 @@ export default function Lesson1Page() {
                           <button
                             type="button"
                             onClick={() => completeSlide("senaryo-2")}
-                            className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+                            className="mt-3 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
                           >
                             Devam et
                           </button>
@@ -1302,7 +1478,7 @@ export default function Lesson1Page() {
       case "tersine-1":
         return (
           <Slide id="tersine-1" title="Kendin yaz 1 / 4">
-            <p className="leading-7 text-zinc-800">
+            <p className="leading-7 text-ink-charcoal">
               Şimdi sıra sende. Öğrendiğin tekniklerden birini kullanarak,
               zayıflatılmış (abartısız, tuzağı açıkça görülebilen) bir manipülatif
               mesaj yaz. Amacın insanları kandırmak değil; tekniğin nasıl çalıştığını
@@ -1322,7 +1498,7 @@ export default function Lesson1Page() {
       case "tersine-2":
         return (
           <Slide id="tersine-2" title="Kendin yaz 2 / 4">
-            <p className="text-zinc-700">Mesajında hangi tetikleyiciyi kullanıyorsun? İşaretle.</p>
+            <p className="text-deep-indigo">Mesajında hangi tetikleyiciyi kullanıyorsun? İşaretle.</p>
             <fieldset className="mt-4">
               <legend className="font-semibold">Tuzakları işaretle: Hangi tetikleyiciyi kullanıyor?</legend>
               <div className="mt-2 flex flex-col gap-2">
@@ -1332,8 +1508,8 @@ export default function Lesson1Page() {
                   return (
                     <label
                       key={t}
-                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border-2 px-4 py-2 shadow-sm transition hover:shadow ${
-                        on ? "border-stone-900 bg-stone-50" : "border-zinc-300 bg-white hover:border-stone-400"
+                      className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 shadow-sm transition hover:shadow ${
+                        on ? "border-iris-bolt bg-chalk-canvas" : "border-mist-border bg-white hover:border-fog-mist"
                       }`}
                     >
                       <input
@@ -1348,7 +1524,7 @@ export default function Lesson1Page() {
                       {on ? (
                         <Tick />
                       ) : (
-                        <span aria-hidden="true" className="h-7 w-7 shrink-0 rounded-full border-2 border-zinc-300" />
+                        <span aria-hidden="true" className="h-7 w-7 shrink-0 rounded-full border-2 border-mist-border" />
                       )}
                       <span className="font-medium">{t}</span>
                     </label>
@@ -1361,7 +1537,7 @@ export default function Lesson1Page() {
       case "tersine-3":
         return (
           <Slide id="tersine-3" title="Kendin yaz 3 / 4">
-            <p className="text-zinc-700">Aynı mesajı FARK ET ile boz — ilk 3 adım:</p>
+            <p className="text-deep-indigo">Aynı mesajı FARK ET ile boz — ilk 3 adım:</p>
             {FARK_ET.slice(0, 3).map((s) => (
               <Field
                 key={s.name}
@@ -1376,7 +1552,7 @@ export default function Lesson1Page() {
       case "tersine-4":
         return (
           <Slide id="tersine-4" title="Kendin yaz 4 / 4">
-            <p className="text-zinc-700">Aynı mesajı FARK ET ile boz — son 3 adım:</p>
+            <p className="text-deep-indigo">Aynı mesajı FARK ET ile boz — son 3 adım:</p>
             {FARK_ET.slice(3, 6).map((s) => (
               <Field
                 key={s.name}
@@ -1394,24 +1570,24 @@ export default function Lesson1Page() {
                   completeSlide("tersine-4");
                 }
               }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
             >
               Kaydet
             </button>
             {(data["tersine-metin"] ?? "").trim() === "" && (
-              <p className="mt-2 text-sm text-zinc-600">Kaydetmek için önce 1. adımda mesajını yaz.</p>
+              <p className="mt-2 text-sm text-slate-veil">Kaydetmek için önce 1. adımda mesajını yaz.</p>
             )}
             {reverseSaved && <Feedback kind="ok">{REVERSE_DONE}</Feedback>}
             <button
               type="button"
               onClick={() => setShowReverseExample((v) => !v)}
               aria-expanded={showReverseExample}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full border border-iris-bolt px-4 text-sm font-semibold"
             >
               Örneği gör
             </button>
             {showReverseExample && (
-              <div className="mt-3 rounded-lg border border-zinc-200 p-4">
+              <div className="mt-3 rounded-lg border border-mist-border p-4">
                 <p className="leading-7"><strong>Örnek mesaj (duygu tuzağı):</strong> {REVERSE_EXAMPLE_MESSAGE}</p>
                 <p className="mt-3 font-semibold">Bozma:</p>
                 <ul className="mt-2 space-y-1">
@@ -1424,7 +1600,10 @@ export default function Lesson1Page() {
       case "cikis":
         return (
           <Slide id="cikis" title="Kısa kontrol">
-            <p className="text-zinc-700">
+            <p className="inline-flex items-center rounded-full bg-iris-bolt px-3 py-1 text-xs font-semibold text-white">
+              Test
+            </p>
+            <p className="mt-3 text-deep-indigo">
               3 kısa soru. Yanlış cevaplarsan o konuyu kısaca tekrar ederiz.
             </p>
             {!exitFinished ? (
@@ -1459,7 +1638,7 @@ export default function Lesson1Page() {
                           completeSlide("cikis");
                         }
                       }}
-                      className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+                      className="mt-3 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
                     >
                       {exitIndex < 2 ? "Sonraki soru" : "Sonucu gör"}
                     </button>
@@ -1468,14 +1647,23 @@ export default function Lesson1Page() {
               </div>
             ) : (
               <div>
+                <div className="mt-4 rounded-lg border border-mist-border bg-white p-5 shadow-[rgba(40,46,62,0.1)_0px_4px_16px_0px]">
+                  <p className="text-lg font-semibold">Sonuç: {3 - exitMissed.length} / 3 doğru</p>
+                  <p className="mt-2 leading-7">
+                    Bildiklerin: {EXIT_QUESTIONS.filter((_, i) => !exitMissed.includes(i)).map((q) => q.technique).join(", ") || "Henüz yok — tekrarlarla güçlenir."}
+                  </p>
+                  <p className="mt-2 leading-7">
+                    Daha çalışman gerekenler: {exitMissed.map((mi) => EXIT_QUESTIONS[mi].technique).join(", ") || "Yok — üçünü de bildin."}
+                  </p>
+                </div>
                 {exitMissed.length === 0 ? (
                   <Feedback kind="ok">{EXIT_ALL_CORRECT}</Feedback>
                 ) : (
                   <div>
                     <Feedback kind="note">{EXIT_SOME_WRONG}</Feedback>
                     {exitMissed.map((mi) => (
-                      <div key={mi} className="mt-4 rounded-2xl border-2 border-stone-900 bg-stone-50 p-5 shadow-sm">
-                        <p className="text-sm font-bold text-stone-500">Kısa tekrar</p>
+                      <div key={mi} className="mt-4 rounded-lg border-2 border-iris-bolt bg-chalk-canvas p-5 shadow-sm">
+                        <p className="text-sm font-bold text-slate-veil">Kısa tekrar</p>
                         <h3 className="mt-1 font-bold">{EXIT_QUESTIONS[mi].remedialTitle}</h3>
                         <p className="mt-2 leading-7">{EXIT_QUESTIONS[mi].remedialText}</p>
                       </div>
@@ -1489,10 +1677,10 @@ export default function Lesson1Page() {
       case "transfer-1":
         return (
           <Slide id="transfer-1" title="Başka bir alanda dene">
-            <p className="leading-7 text-zinc-800">
+            <p className="leading-7 text-ink-charcoal">
               Şimdi aynı beceriyi alışveriş dışında bir alanda dene.
             </p>
-            <blockquote className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 leading-7">
+            <blockquote className="mt-3 rounded-lg border border-mist-border bg-chalk-canvas p-4 leading-7">
               {TRANSFER_TEXT}
             </blockquote>
             {quick(
@@ -1508,7 +1696,7 @@ export default function Lesson1Page() {
       case "transfer-2":
         return (
           <Slide id="transfer-2" title="FARK ET ile yaz 1 / 2">
-            <p className="text-zinc-700">Her adıma 1–2 cümle yaz — ilk 3 adım:</p>
+            <p className="text-deep-indigo">Her adıma 1–2 cümle yaz — ilk 3 adım:</p>
             {FARK_ET.slice(0, 3).map((s) => (
               <Field
                 key={s.name}
@@ -1523,7 +1711,7 @@ export default function Lesson1Page() {
       case "transfer-3":
         return (
           <Slide id="transfer-3" title="FARK ET ile yaz 2 / 2">
-            <p className="text-zinc-700">Her adıma 1–2 cümle yaz — son 3 adım:</p>
+            <p className="text-deep-indigo">Her adıma 1–2 cümle yaz — son 3 adım:</p>
             {FARK_ET.slice(3, 6).map((s) => (
               <Field
                 key={s.name}
@@ -1539,7 +1727,7 @@ export default function Lesson1Page() {
                 setTransferSaved(true);
                 completeSlide("transfer-3");
               }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
             >
               Kaydet
             </button>
@@ -1549,12 +1737,12 @@ export default function Lesson1Page() {
                   type="button"
                   onClick={() => setShowTransferModel((v) => !v)}
                   aria-expanded={showTransferModel}
-                  className="inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
+                  className="inline-flex min-h-11 items-center rounded-full border border-iris-bolt px-4 text-sm font-semibold"
                 >
                   Model cevabı gör
                 </button>
                 {showTransferModel && (
-                  <ul className="mt-3 space-y-1 rounded-lg border border-zinc-200 p-4">
+                  <ul className="mt-3 space-y-1 rounded-lg border border-mist-border p-4">
                     {TRANSFER_MODEL.map((m) => <li key={m} className="leading-7">{m}</li>)}
                   </ul>
                 )}
@@ -1565,11 +1753,11 @@ export default function Lesson1Page() {
       case "rubrik-1":
         return (
           <Slide id="rubrik-1" title="Kendini değerlendir 1 / 2">
-            <p className="text-zinc-700">
+            <p className="text-deep-indigo">
               Kendi analizini puanla. Her soruya 1 (zayıf) ile 5 (güçlü) arasında puan ver.
             </p>
             {RUBRIC_QUESTIONS.slice(0, 4).map((q, i) => (
-              <div key={q.name} className="mt-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div key={q.name} className="mt-5 rounded-lg border border-mist-border bg-white p-4 shadow-sm">
                 <p className="font-semibold">
                   {q.name} {q.detail}
                 </p>
@@ -1582,15 +1770,15 @@ export default function Lesson1Page() {
                       onClick={() => setRubric((prev) => ({ ...prev, [i]: value }))}
                       className={`flex min-h-12 min-w-12 flex-1 items-center justify-center rounded-full border-2 text-base font-bold transition ${
                         rubric[i] === value
-                          ? "border-stone-900 bg-stone-900 text-white"
-                          : "border-zinc-300 bg-white hover:border-stone-400"
+                          ? "border-iris-bolt bg-iris-bolt text-white"
+                          : "border-mist-border bg-white hover:border-fog-mist"
                       }`}
                     >
                       {value}
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 flex justify-between text-xs text-zinc-500">
+                <p className="mt-2 flex justify-between text-xs text-slate-veil">
                   <span>1 — Zayıf</span>
                   <span>5 — Güçlü</span>
                 </p>
@@ -1601,11 +1789,11 @@ export default function Lesson1Page() {
       case "rubrik-2":
         return (
           <Slide id="rubrik-2" title="Kendini değerlendir 2 / 2">
-            <p className="text-zinc-700">Devamı:</p>
+            <p className="text-deep-indigo">Devamı:</p>
             {RUBRIC_QUESTIONS.slice(4, 7).map((q, idx) => {
               const i = idx + 4;
               return (
-                <div key={q.name} className="mt-5 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                <div key={q.name} className="mt-5 rounded-lg border border-mist-border bg-white p-4 shadow-sm">
                   <p className="font-semibold">
                     {q.name} {q.detail}
                   </p>
@@ -1618,15 +1806,15 @@ export default function Lesson1Page() {
                         onClick={() => setRubric((prev) => ({ ...prev, [i]: value }))}
                         className={`flex min-h-12 min-w-12 flex-1 items-center justify-center rounded-full border-2 text-base font-bold transition ${
                           rubric[i] === value
-                            ? "border-stone-900 bg-stone-900 text-white"
-                            : "border-zinc-300 bg-white hover:border-stone-400"
+                            ? "border-iris-bolt bg-iris-bolt text-white"
+                            : "border-mist-border bg-white hover:border-fog-mist"
                         }`}
                       >
                         {value}
                       </button>
                     ))}
                   </div>
-                  <p className="mt-2 flex justify-between text-xs text-zinc-500">
+                  <p className="mt-2 flex justify-between text-xs text-slate-veil">
                     <span>1 — Zayıf</span>
                     <span>5 — Güçlü</span>
                   </p>
@@ -1636,7 +1824,7 @@ export default function Lesson1Page() {
             <button
               type="button"
               onClick={() => { setRubricSaved(true); completeSlide("rubrik-2"); }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
             >
               Kaydet
             </button>
@@ -1650,19 +1838,19 @@ export default function Lesson1Page() {
       case "gunluk-1":
         return (
           <Slide id="gunluk-1" title="Günlüğüne yaz 1 / 2">
-            <p className="leading-7 text-zinc-800">
+            <p className="leading-7 text-ink-charcoal">
               Şimdi kendi hayatından 1 örneği FARK ET ile yaz. Yazıların sende kalır.
             </p>
             <button
               type="button"
               onClick={() => setShowJournalExample((v) => !v)}
               aria-expanded={showJournalExample}
-              className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-stone-900 px-4 text-sm font-semibold"
+              className="mt-3 inline-flex min-h-11 items-center rounded-full border border-iris-bolt px-4 text-sm font-semibold"
             >
               Örneği gör
             </button>
             {showJournalExample && (
-              <ul className="mt-3 space-y-1 rounded-lg border border-zinc-200 p-4">
+              <ul className="mt-3 space-y-1 rounded-lg border border-mist-border p-4">
                 {JOURNAL_EXAMPLE.map((e) => <li key={e} className="leading-7">{e}</li>)}
               </ul>
             )}
@@ -1680,7 +1868,7 @@ export default function Lesson1Page() {
       case "gunluk-2":
         return (
           <Slide id="gunluk-2" title="Günlüğüne yaz 2 / 2">
-            <p className="text-zinc-700">Devamı:</p>
+            <p className="text-deep-indigo">Devamı:</p>
             {JOURNAL_FIELDS.slice(3, 6).map((f) => (
               <Field
                 key={f.key}
@@ -1698,12 +1886,12 @@ export default function Lesson1Page() {
                   completeSlide("gunluk-2");
                 }
               }}
-              className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-stone-900 px-4 text-sm font-semibold text-white"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-iris-bolt px-4 text-sm font-semibold text-white"
             >
               Kaydet
             </button>
             {(data["gunluk-olay"] ?? "").trim() === "" && (
-              <p className="mt-2 text-sm text-zinc-600">Kaydetmek için önce 1. adımda olayı yaz.</p>
+              <p className="mt-2 text-sm text-slate-veil">Kaydetmek için önce 1. adımda olayı yaz.</p>
             )}
             {journalSaved && <Feedback kind="ok">{JOURNAL_SAVED}</Feedback>}
           </Slide>
@@ -1711,7 +1899,7 @@ export default function Lesson1Page() {
       case "kapanis-1":
         return (
           <Slide id="kapanis-1" title="Bu derste 3 şeyi öğrendin">
-            <ol className="mt-2 list-decimal space-y-2 pl-5 leading-7 text-zinc-800">
+            <ol className="mt-2 list-decimal space-y-2 pl-5 leading-7 text-ink-charcoal">
               {CLOSING_POINTS.map((p) => <li key={p}>{p}</li>)}
             </ol>
             <p className="mt-4 font-semibold">
@@ -1730,23 +1918,23 @@ export default function Lesson1Page() {
       case "kapanis-2":
         return (
           <Slide id="kapanis-2" title="Sonraki adım">
-            <p className="mt-2 text-zinc-700">
+            <p className="mt-2 text-deep-indigo">
               Ders bitti. Her e-posta tek eylem içerir, uzun metin içermez.
             </p>
             <ul className="mt-3 space-y-3">
               {EMAIL_BOOSTERS.map((e) => (
-                <li key={e.when} className="rounded-lg border border-zinc-200 p-4">
+                <li key={e.when} className="rounded-lg border border-mist-border p-4">
                   <p className="font-semibold">{e.when}: {e.title}</p>
-                  <p className="mt-1 leading-7 text-zinc-700">{e.body}</p>
+                  <p className="mt-1 leading-7 text-deep-indigo">{e.body}</p>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 text-sm text-zinc-600">
+            <p className="mt-4 text-sm text-slate-veil">
               Not: Bu ilk sürümde e-posta gönderimi henüz kurulmamıştır; yukarıdaki
               görevler, sistem kurulduğunda gönderilecek güçlendirmelerin
               içeriğidir.
             </p>
-            <a href="/" onClick={() => completeSlide("kapanis-2")} className="mt-4 inline-flex min-h-12 items-center rounded-xl bg-stone-900 px-5 text-sm font-semibold text-white">
+            <a href="/" onClick={() => completeSlide("kapanis-2")} className="mt-4 inline-flex min-h-12 items-center rounded-full bg-iris-bolt px-5 text-sm font-semibold text-white">
               Ana sayfaya dön
             </a>
           </Slide>
@@ -1758,10 +1946,10 @@ export default function Lesson1Page() {
 
 
   return (
-    <div className="min-h-screen bg-stone-100 px-4 py-6 sm:py-10">
+    <div className="min-h-screen bg-chalk-canvas px-4 py-6 sm:py-10">
       <div className="mx-auto max-w-2xl">
         <div
-          className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200"
+          className="h-1.5 w-full overflow-hidden rounded-full bg-mist-border"
           role="progressbar"
           aria-valuenow={doneCount}
           aria-valuemin={0}
@@ -1769,14 +1957,14 @@ export default function Lesson1Page() {
           aria-label="Ders ilerlemesi"
         >
           <div
-            className="h-full rounded-full bg-stone-900"
+            className="h-full rounded-full bg-iris-bolt"
             style={{ width: `${(doneCount / SLIDES.length) * 100}%` }}
           />
         </div>
-        <p className="mt-5 text-center text-sm font-medium text-stone-500">
+        <p className="mt-5 text-center text-sm font-medium text-slate-veil">
           Zihin Nasıl Kandırılır? · Slayt {currentSlide + 1} / {SLIDES.length}
         </p>
-        <main className="mt-4 rounded-3xl bg-white p-6 shadow-sm sm:p-10">
+        <main className="mt-4 rounded-lg bg-white p-6 shadow-[rgba(40,46,62,0.1)_0px_4px_16px_0px] sm:p-10">
           {renderSlide()}
           {nav}
         </main>
@@ -1785,7 +1973,7 @@ export default function Lesson1Page() {
             type="button"
             aria-expanded={showSlides}
             onClick={() => setShowSlides((v) => !v)}
-            className="inline-flex min-h-11 items-center rounded-full border border-stone-300 bg-white px-5 text-sm font-semibold"
+            className="inline-flex min-h-11 items-center rounded-full border border-mist-border bg-white px-5 text-sm font-semibold"
           >
             Slaytlar
           </button>
@@ -1805,10 +1993,10 @@ export default function Lesson1Page() {
                       aria-current={i === currentSlide ? "true" : undefined}
                       className={`min-h-11 w-full rounded-xl border px-4 py-2 text-left text-sm ${
                         i === currentSlide
-                          ? "border-stone-900 bg-stone-900 text-white"
+                          ? "border-iris-bolt bg-iris-bolt text-white"
                           : enabled
-                            ? "border-stone-300 bg-white"
-                            : "border-stone-200 bg-stone-50 text-stone-400"
+                            ? "border-mist-border bg-white"
+                            : "border-mist-border bg-chalk-canvas text-fog-mist"
                       }`}
                     >
                       {i + 1}. {s.title}
@@ -1819,7 +2007,7 @@ export default function Lesson1Page() {
             </ol>
           )}
         </div>
-        <p className="mt-5 text-center text-sm text-stone-500">
+        <p className="mt-5 text-center text-sm text-slate-veil">
           Yazıların sende kalır.
         </p>
       </div>
