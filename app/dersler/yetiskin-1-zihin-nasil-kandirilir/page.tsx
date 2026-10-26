@@ -172,6 +172,63 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
   );
 }
 
+const IMG = {
+  hook: "/media-generation-kanca-kis-botu-0-c73c51e7-bba6-48d6-85f9-fba713870fd1.png",
+  trap: "/media-generation-tuzak-yorumlar-0-a8addce0-87a4-4525-a965-353b659e376a.png",
+  fear: "/media-generation-korku-mesaji-v2-0-1c490443-70e2-4853-aadf-eb14f0fe17ba.png",
+  friend: "/media-generation-arkadas-mesaji-0-365fed32-f766-409c-be73-0ecaa34fa954.png",
+};
+
+// Ders mesajlarının ekran görüntüsü: görselin kendisi + metni okuma seçeneği.
+function MessageImage({
+  src,
+  alt,
+  lines,
+  label,
+}: {
+  src: string;
+  alt: string;
+  lines: string[];
+  label: string;
+}) {
+  return (
+    <figure aria-label={label} className="overflow-hidden rounded-lg border border-mist-border bg-white shadow-sm">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} loading="lazy" className="mx-auto block w-full max-w-md" />
+      <figcaption className="border-t border-mist-border bg-chalk-canvas px-4 py-3">
+        <details>
+          <summary className="cursor-pointer text-sm font-semibold text-deep-indigo">
+            Görseldeki metni oku
+          </summary>
+          <div className="mt-2 space-y-1">
+            {lines.map((line, i) => (
+              <p key={i} className="text-sm leading-6">{line}</p>
+            ))}
+          </div>
+        </details>
+      </figcaption>
+    </figure>
+  );
+}
+
+// Görseli olmayan mesajlar için aynı dilde telefon/gönderi çerçevesi.
+function ScreenshotFrame({
+  header,
+  children,
+}: {
+  header: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-mist-border bg-white shadow-sm">
+      <div className="border-b border-mist-border bg-chalk-canvas px-4 py-2 text-sm font-semibold text-slate-veil">
+        {header}
+      </div>
+      <div className="p-4 leading-7">{children}</div>
+    </div>
+  );
+}
+
 function FlashcardDeck({
   cards,
   label,
@@ -1110,14 +1167,12 @@ export default function Lesson1Page() {
         return (
           <Slide id="kanca" title="İlk mesaj">
             <p className="text-deep-indigo">Önce mesajı oku, sonra ilk tepkini seç.</p>
-            <div className="mt-3 rounded-full border border-iris-bolt p-4" aria-label="Kurgusal indirim mesajı örneği">
-              {HOOK_MESSAGE.map((line, i) => (
-                <p key={i} className={i === 0 ? "font-bold" : "mt-1"}>{line}</p>
-              ))}
-              <p className="mt-3 inline-block rounded-full bg-iris-bolt px-4 py-2 font-semibold text-white">
-                ŞİMDİ SATIN AL
-              </p>
-            </div>
+            <MessageImage
+              src={IMG.hook}
+              label="Kurgusal indirim mesajı örneği"
+              alt="Sponsorlu gönderi: KutupAyı Mağaza. SON 1 SAAT! Kış botu, yüzde 60 indirim. Stokta son 2 adet kaldı. Şu an 3.482 kişi bu ürüne bakıyor. Yorum: Kaçırmayın, ben dün aldım, bugün fiyatı arttı! ŞİMDİ SATIN AL düğmesi."
+              lines={[...HOOK_MESSAGE, "ŞİMDİ SATIN AL"]}
+            />
             <p className="mt-4 font-semibold">Bu mesajı okuduğunda ilk tepkin ne oldu?</p>
             <ChoiceButtons
               options={HOOK_OPTIONS}
@@ -1246,6 +1301,14 @@ export default function Lesson1Page() {
             <p className="mt-2 text-sm font-semibold text-slate-veil">
               Bulunan: {targetsFound} / 3
             </p>
+            <p className="text-deep-indigo">İncelediğin gönderi:</p>
+            <MessageImage
+              src={IMG.trap}
+              label="İncelenecek yorumlar"
+              alt="Kulaklık gönderisi ve yorumlar: mavi_defter: Bu kulaklığı aldım, ses kalitesi gerçekten iyiymiş, ben de zaten iyi olacağını düşünüyordum. gece_yolcusu: Ben de aynı şeyi düşünüyordum, demek ki herkes memnun. gece_yolcusu: Başka yoruma gerek yok bence. sade_dusunceli: Ben farklı bir model denedim, pil ömrü konusunda sorun yaşadım, bunu da kontrol etmenizi öneririm. mavi_defter: O tek tük bir sorun, genelde herkes memnun zaten, ona takılma."
+              lines={TRAP_SENTENCES.map((x) => `${x.user}: ${x.text}`)}
+            />
+            <p className="text-deep-indigo">Şimdi bu cümlelerden onay önyargısını besleyenleri aşağıda işaretle.</p>
             <div className="mt-3 flex flex-col gap-3" role="group" aria-label="İşaretlenecek cümleler">
               {TRAP_SENTENCES.map((s) => {
                 const isMarked = marked.includes(s.id);
@@ -1366,9 +1429,12 @@ export default function Lesson1Page() {
           <Slide id="mikro-3-tahmin" title="Duygu tuzağı — Dene">
             <h3 className="text-lg font-bold">Dene</h3>
             <p className="mt-2 text-deep-indigo">Mesajı oku:</p>
-            <blockquote className="mt-3 rounded-lg border border-mist-border bg-chalk-canvas p-5 leading-7 shadow-sm">
-              {POLL_MESSAGE}
-            </blockquote>
+            <MessageImage
+              src={IMG.fear}
+              label="İncelenecek mesaj"
+              alt="GüvenMesaj mesajı: Dün gece komşumun başına geleni duydun mu? Aynı apartmanda oturan birinin hesabı boşaltılmış. Sen de aynı uygulamayı kullanıyorsun. Hemen şuraya tıkla, hesabını koru, yoksa sen de aynı duruma düşersin!"
+              lines={[POLL_MESSAGE]}
+            />
             <p className="mt-3 font-semibold">Bu mesajın devamında büyük olasılıkla ne olur?</p>
             <ChoiceButtons
               options={POLL_OPTIONS}
@@ -1398,7 +1464,18 @@ export default function Lesson1Page() {
       case "senaryo-1":
         return (
           <Slide id="senaryo-1" title="Bir mesaj geldi">
-            {paras(SCENARIO_TEXT, 0, 3)}
+            <p className="leading-7 text-ink-charcoal">{SCENARIO_TEXT[0]}</p>
+            <MessageImage
+              src={IMG.friend}
+              label="Arkadaş mesajı"
+              alt="Arkadaş sohbeti: Dün akşam konuştuklarımızı bulabildin mi? Bak, bu ayakkabı inanılmaz indirime girmiş, ben de alacağım, sen de hemen al, yoksa bitiyor! Bağlantı burada, acele et. Ürün kartı: Koşu Ayakkabısı, 449 TL, eski fiyat 899 TL, yüzde 50 indirim, kampanya bitiyor: 00:17:42, son 3 adet, 2.147 kişi bakıyor, Ürüne Git düğmesi."
+              lines={[
+                "Dün akşam konuştuklarımızı bulabildin mi?",
+                SCENARIO_TEXT[1],
+                "Koşu Ayakkabısı — 449 TL (eski fiyat 899 TL, %50 indirim). Kampanya bitiyor: 00:17:42. Son 3 adet. 2.147 kişi bakıyor.",
+              ]}
+            />
+            <p className="leading-7 text-ink-charcoal">{SCENARIO_TEXT[2]}</p>
             {quick(
               "peki-senaryo",
               "Bu sayfada seni acele ettiren nedir?",
@@ -1587,13 +1664,13 @@ export default function Lesson1Page() {
               Örneği gör
             </button>
             {showReverseExample && (
-              <div className="mt-3 rounded-lg border border-mist-border p-4">
+              <ScreenshotFrame header="Örnek mesaj">
                 <p className="leading-7"><strong>Örnek mesaj (duygu tuzağı):</strong> {REVERSE_EXAMPLE_MESSAGE}</p>
                 <p className="mt-3 font-semibold">Bozma:</p>
                 <ul className="mt-2 space-y-1">
                   {REVERSE_EXAMPLE_BREAKDOWN.map((b) => <li key={b} className="leading-7">{b}</li>)}
                 </ul>
-              </div>
+              </ScreenshotFrame>
             )}
           </Slide>
         );
@@ -1680,9 +1757,9 @@ export default function Lesson1Page() {
             <p className="leading-7 text-ink-charcoal">
               Şimdi aynı beceriyi alışveriş dışında bir alanda dene.
             </p>
-            <blockquote className="mt-3 rounded-lg border border-mist-border bg-chalk-canvas p-4 leading-7">
+            <ScreenshotFrame header="Mesaj">
               {TRANSFER_TEXT}
-            </blockquote>
+            </ScreenshotFrame>
             {quick(
               "peki-transfer",
               "Bu mesaj senden ne istiyor?",
@@ -1850,9 +1927,11 @@ export default function Lesson1Page() {
               Örneği gör
             </button>
             {showJournalExample && (
-              <ul className="mt-3 space-y-1 rounded-lg border border-mist-border p-4">
-                {JOURNAL_EXAMPLE.map((e) => <li key={e} className="leading-7">{e}</li>)}
-              </ul>
+              <ScreenshotFrame header="Örnek günlük girişi">
+                <ul className="space-y-1">
+                  {JOURNAL_EXAMPLE.map((e) => <li key={e} className="leading-7">{e}</li>)}
+                </ul>
+              </ScreenshotFrame>
             )}
             {JOURNAL_FIELDS.slice(0, 3).map((f) => (
               <Field
@@ -1923,9 +2002,14 @@ export default function Lesson1Page() {
             </p>
             <ul className="mt-3 space-y-3">
               {EMAIL_BOOSTERS.map((e) => (
-                <li key={e.when} className="rounded-lg border border-mist-border p-4">
-                  <p className="font-semibold">{e.when}: {e.title}</p>
-                  <p className="mt-1 leading-7 text-deep-indigo">{e.body}</p>
+                <li key={e.when} className="overflow-hidden rounded-lg border border-mist-border bg-white shadow-sm">
+                  <div className="border-b border-mist-border bg-chalk-canvas px-4 py-2 text-sm font-semibold text-slate-veil">
+                    {e.when}
+                  </div>
+                  <div className="p-4">
+                    <p className="font-semibold">{e.title}</p>
+                    <p className="mt-1 leading-7 text-deep-indigo">{e.body}</p>
+                  </div>
                 </li>
               ))}
             </ul>
