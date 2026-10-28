@@ -179,8 +179,9 @@ const IMG = {
   friend: "/media-generation-arkadas-mesaji-0-365fed32-f766-409c-be73-0ecaa34fa954.png",
 };
 
-// Slayt bazlı ses ve şema görselleri. Ses dosyaları public/ders-sesleri,
-// şema görselleri public/ders-gorselleri altındadır. Bir slaytta ses yoksa
+// Slayt bazlı ses ve şema görselleri. Dosyalar GitHub'da public/ kökünde
+// durduğu için yollar kökten verilir; GitHub web'de boş klasör oluşmaz,
+// klasör ancak içinde dosya olunca görünür. Bir slaytta ses yoksa
 // oynatıcı da çıkmaz; görsel yalnızca ilgili özet slaytlarında gösterilir.
 const SLIDE_MEDIA: Record<
   string,
@@ -189,36 +190,36 @@ const SLIDE_MEDIA: Record<
     diagram?: { src: string; label: string; alt: string; lines: string[] };
   }
 > = {
-  giris: { audio: "/ders-sesleri/baslangic.mp3" },
-  etik: { audio: "/ders-sesleri/etik_sozlesme.mp3" },
-  "mikro-1-1": { audio: "/ders-sesleri/hizli_dusunme_1.mp3" },
-  "mikro-1-2": { audio: "/ders-sesleri/hizli_dusunme_2.mp3" },
+  giris: { audio: "/baslangic.mp3" },
+  etik: { audio: "/etik_sozlesme.mp3" },
+  "mikro-1-1": { audio: "/hizli_dusunme_1.mp3" },
+  "mikro-1-2": { audio: "/hizli_dusunme_2.mp3" },
   "mikro-1-3": {
-    audio: "/ders-sesleri/hizli_dusunme_3.mp3",
+    audio: "/hizli_dusunme_3.mp3",
     diagram: {
-      src: "/ders-gorselleri/hizli-yavas-dusunme.png",
+      src: "/slide8.png",
       label: "Hızlı ve yavaş düşünme karşılaştırması",
       alt: "Hızlı düşünme: otomatik, hızlı, duygusal, enerji tasarruflu. Yavaş düşünme: bilinçli, yavaş, kanıt arayan, enerji isteyen. Önemli kararda yavaş moda geç.",
       lines: ["Hızlı düşünme: otomatik, hızlı, duygusal, enerji tasarruflu.", "Yavaş düşünme: bilinçli, yavaş, kanıt arayan, enerji isteyen.", "Önemli kararda yavaş moda geç."],
     },
   },
-  "mikro-2-1": { audio: "/ders-sesleri/onay_1.mp3" },
+  "mikro-2-1": { audio: "/onay_1.mp3" },
   "mikro-2-2": {
-    audio: "/ders-sesleri/onay_2.mp3",
+    audio: "/onay_2.mp3",
     diagram: {
-      src: "/ders-gorselleri/onay-onyargisi-dongusu.png",
+      src: "/slayt12.png",
       label: "Onay önyargısı döngüsü",
       alt: "Onay önyargısı döngüsü: Mevcut fikir, aynı fikirdeki içeriği seçme, fikrin güçlenmesi, karşıt kanıtı görmezden gelme, mevcut fikir daha güçlü. Ve döngü başa döner.",
       lines: ["Mevcut fikir", "Aynı fikirdeki içeriği seçme", "Fikrin güçlenmesi", "Karşıt kanıtı görmezden gelme", "Mevcut fikir (daha güçlü)"],
     },
   },
-  "mikro-2-3": { audio: "/ders-sesleri/onay_3.mp3" },
-  "mikro-3-1": { audio: "/ders-sesleri/duygu_1.mp3" },
-  "mikro-3-2": { audio: "/ders-sesleri/duygu_2.mp3" },
+  "mikro-2-3": { audio: "/onay_3.mp3" },
+  "mikro-3-1": { audio: "/duygu_1.mp3" },
+  "mikro-3-2": { audio: "/duygu_2.mp3" },
   "mikro-3-3": {
-    audio: "/ders-sesleri/duygu_3.mp3",
+    audio: "/duygu_3.mp3",
     diagram: {
-      src: "/ders-gorselleri/duygu-tuzagi-akisi.png",
+      src: "/slayt18.png",
       label: "Duygu tuzağı akışı",
       alt: "Tuzak akışı: Duygu yükselir, düşünme kısalır, acele karar, sonradan pişmanlık. Fren ile kesilen akış: Duygu yükselir, duyguyu adlandır, dur, FARK ET ile analiz et, kendi kararın.",
       lines: ["Tuzak akışı: Duygu yükselir, düşünme kısalır, acele karar, sonradan pişmanlık.", "Fren ile kesilen akış: Duygu yükselir, duyguyu adlandır, dur, FARK ET ile analiz et, kendi kararın."],
