@@ -173,15 +173,14 @@ function Feedback({ kind, children }: { kind: "ok" | "note"; children: React.Rea
 }
 
 const IMG = {
-  hook: "/media-generation-kanca-kis-botu-0-c73c51e7-bba6-48d6-85f9-fba713870fd1.png",
-  trap: "/media-generation-tuzak-yorumlar-0-a8addce0-87a4-4525-a965-353b659e376a.png",
-  fear: "/media-generation-korku-mesaji-v2-0-1c490443-70e2-4853-aadf-eb14f0fe17ba.png",
-  friend: "/media-generation-arkadas-mesaji-0-365fed32-f766-409c-be73-0ecaa34fa954.png",
+  hook: "/gorseller/ders1/media-generation-kanca-kis-botu-0-c73c51e7-bba6-48d6-85f9-fba713870fd1.png",
+  trap: "/gorseller/ders1/media-generation-tuzak-yorumlar-0-a8addce0-87a4-4525-a965-353b659e376a.png",
+  fear: "/gorseller/ders1/media-generation-korku-mesaji-v2-0-1c490443-70e2-4853-aadf-eb14f0fe17ba.png",
+  friend: "/gorseller/ders1/media-generation-arkadas-mesaji-0-365fed32-f766-409c-be73-0ecaa34fa954.png",
 };
 
-// Slayt bazlı ses ve şema görselleri. Dosyalar GitHub'da public/ kökünde
-// durduğu için yollar kökten verilir; GitHub web'de boş klasör oluşmaz,
-// klasör ancak içinde dosya olunca görünür. Bir slaytta ses yoksa
+// Slayt bazlı ses ve şema görselleri. Dosyalar GitHub'da public/sesler/ders1 ve public/gorseller/ders1
+// altındadır; yollar bu klasörleri işaret eder. Bir slaytta ses yoksa
 // oynatıcı da çıkmaz; görsel yalnızca ilgili özet slaytlarında gösterilir.
 const SLIDE_MEDIA: Record<
   string,
@@ -190,36 +189,36 @@ const SLIDE_MEDIA: Record<
     diagram?: { src: string; label: string; alt: string; lines: string[] };
   }
 > = {
-  giris: { audio: "/baslangic.mp3" },
-  etik: { audio: "/etik_sozlesme.mp3" },
-  "mikro-1-1": { audio: "/hizli_dusunme_1.mp3" },
-  "mikro-1-2": { audio: "/hizli_dusunme_2.mp3" },
+  giris: { audio: "/sesler/ders1/baslangic.mp3" },
+  etik: { audio: "/sesler/ders1/etik_sozlesme.mp3" },
+  "mikro-1-1": { audio: "/sesler/ders1/hizli_dusunme_1.mp3" },
+  "mikro-1-2": { audio: "/sesler/ders1/hizli_dusunme_2.mp3" },
   "mikro-1-3": {
-    audio: "/hizli_dusunme_3.mp3",
+    audio: "/sesler/ders1/hizli_dusunme_3.mp3",
     diagram: {
-      src: "/slide8.png",
+      src: "/gorseller/ders1/slide8.png",
       label: "Hızlı ve yavaş düşünme karşılaştırması",
       alt: "Hızlı düşünme: otomatik, hızlı, duygusal, enerji tasarruflu. Yavaş düşünme: bilinçli, yavaş, kanıt arayan, enerji isteyen. Önemli kararda yavaş moda geç.",
       lines: ["Hızlı düşünme: otomatik, hızlı, duygusal, enerji tasarruflu.", "Yavaş düşünme: bilinçli, yavaş, kanıt arayan, enerji isteyen.", "Önemli kararda yavaş moda geç."],
     },
   },
-  "mikro-2-1": { audio: "/onay_1.mp3" },
+  "mikro-2-1": { audio: "/sesler/ders1/onay_1.mp3" },
   "mikro-2-2": {
-    audio: "/onay_2.mp3",
+    audio: "/sesler/ders1/onay_2.mp3",
     diagram: {
-      src: "/slayt12.png",
+      src: "/gorseller/ders1/slayt12.png",
       label: "Onay önyargısı döngüsü",
       alt: "Onay önyargısı döngüsü: Mevcut fikir, aynı fikirdeki içeriği seçme, fikrin güçlenmesi, karşıt kanıtı görmezden gelme, mevcut fikir daha güçlü. Ve döngü başa döner.",
       lines: ["Mevcut fikir", "Aynı fikirdeki içeriği seçme", "Fikrin güçlenmesi", "Karşıt kanıtı görmezden gelme", "Mevcut fikir (daha güçlü)"],
     },
   },
-  "mikro-2-3": { audio: "/onay_3.mp3" },
-  "mikro-3-1": { audio: "/duygu_1.mp3" },
-  "mikro-3-2": { audio: "/duygu_2.mp3" },
+  "mikro-2-3": { audio: "/sesler/ders1/onay_3.mp3" },
+  "mikro-3-1": { audio: "/sesler/ders1/duygu_1.mp3" },
+  "mikro-3-2": { audio: "/sesler/ders1/duygu_2.mp3" },
   "mikro-3-3": {
-    audio: "/duygu_3.mp3",
+    audio: "/sesler/ders1/duygu_3.mp3",
     diagram: {
-      src: "/slayt18.png",
+      src: "/gorseller/ders1/slayt18.png",
       label: "Duygu tuzağı akışı",
       alt: "Tuzak akışı: Duygu yükselir, düşünme kısalır, acele karar, sonradan pişmanlık. Fren ile kesilen akış: Duygu yükselir, duyguyu adlandır, dur, FARK ET ile analiz et, kendi kararın.",
       lines: ["Tuzak akışı: Duygu yükselir, düşünme kısalır, acele karar, sonradan pişmanlık.", "Fren ile kesilen akış: Duygu yükselir, duyguyu adlandır, dur, FARK ET ile analiz et, kendi kararın."],
