@@ -1185,12 +1185,6 @@ export default function Lesson1Page() {
       list.slice(from, to).map((p, i) => (
         <p key={i} className="mt-3 leading-7 text-ink-charcoal first:mt-0">{p}</p>
       ));
-    const diagram = (lesson: MicroLesson) => (
-      <figure className="mt-5 rounded-lg border border-mist-border bg-chalk-canvas p-5 shadow-sm">
-        <figcaption className="font-semibold">{lesson.diagramTitle}</figcaption>
-        <p className="mt-2 leading-7 text-deep-indigo">{lesson.diagram}</p>
-      </figure>
-    );
     const quick = (
       key: string,
       question: string,
@@ -1332,7 +1326,6 @@ export default function Lesson1Page() {
         return (
           <Slide id="mikro-1-3" title="Hızlı düşünme 3 / 3">
             {paras(MICRO_1.paragraphs, 6, 7)}
-            {diagram(MICRO_1)}
             {quick(
               "peki-m1-3",
               "Acele hissettiğinde ilk adım nedir?",
@@ -1385,7 +1378,6 @@ export default function Lesson1Page() {
         return (
           <Slide id="mikro-2-2" title="Onay önyargısı 2 / 3">
             {paras(MICRO_2.paragraphs, 2, 4)}
-            {diagram(MICRO_2)}
             {quick(
               "peki-m2-2",
               "“Herkes böyle düşünüyor” hissi neden oluşur?",
@@ -1530,7 +1522,6 @@ export default function Lesson1Page() {
         return (
           <Slide id="mikro-3-3" title="Duygu tuzağı 3 / 3">
             {paras(MICRO_3.paragraphs, 5, 6)}
-            {diagram(MICRO_3)}
             {quick(
               "peki-m3-3",
               "Korku hissettiğinde ilk ne yaparsın?",
