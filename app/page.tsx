@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-const LESSON_PATH = "/dersler/yetiskin-1-zihin-nasil-kandirilir";
+const LESSON_PATHS = {
+  "Zihin Nasıl Kandırılır?": "/dersler/yetiskin-1-zihin-nasil-kandirilir",
+  "Argüman ve Safsatalar": "/dersler/yetiskin-2-arguman-ve-safsatalar",
+} as const;
 
 const farkEt = [
   { letter: "F", name: "Fren", question: "Duygu yükselince dur." },
@@ -36,7 +39,7 @@ const adultModules = [
     body: "Zihnin nasıl çalıştığını ve sağlam bir argümanın nasıl kurulduğunu öğren.",
     lessons: [
       { title: "Zihin Nasıl Kandırılır?", status: "available" },
-      { title: "Argüman ve Safsatalar", status: "soon" },
+      { title: "Argüman ve Safsatalar", status: "available" },
     ],
   },
   {
@@ -119,14 +122,14 @@ export default function Home() {
         </p>
         <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link
-            href={LESSON_PATH}
+            href={LESSON_PATHS["Zihin Nasıl Kandırılır?"]}
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-iris-bolt px-6 text-base font-semibold text-white shadow-[rgba(40,46,62,0.1)_0px_2px_4px_0px]"
           >
             Ders 1&apos;e başla: Zihin Nasıl Kandırılır?
           </Link>
         </div>
         <p className="mt-3 text-sm text-slate-veil">
-          Şu anda yalnızca Yetişkin Ders 1 hazırdır. Diğer dersler, ergen
+          Şu anda Yetişkin Ders 1 ve Ders 2 hazırdır. Diğer dersler, ergen
           versiyonu, kayıt ve ödeme henüz eklenmemiştir.
         </p>
       </section>
@@ -241,7 +244,7 @@ export default function Home() {
                       </span>
                       {lesson.status === "available" ? (
                         <Link
-                          href={LESSON_PATH}
+                          href={LESSON_PATHS[lesson.title as keyof typeof LESSON_PATHS]}
                           className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-iris-bolt px-5 text-sm font-semibold text-white"
                         >
                           Başla
