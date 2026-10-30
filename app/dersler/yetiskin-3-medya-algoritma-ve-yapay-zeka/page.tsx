@@ -966,6 +966,11 @@ export default function Lesson3Page() {
     setVisited((prev) => (prev.includes(clamped) ? prev : [...prev, clamped]));
   };
 
+  // Slayt değiştiğinde sayfanın başına dön: yeni slayt hep yukarıdan okunur.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [currentSlide]);
+
   useEffect(() => {
     const storedDone = readStored<Record<string, boolean>>(PROGRESS_KEY, {});
     const valid: Record<string, boolean> = {};
