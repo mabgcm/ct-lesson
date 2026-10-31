@@ -4,6 +4,7 @@ const LESSON_PATHS = {
   "Zihin Nasıl Kandırılır?": "/dersler/yetiskin-1-zihin-nasil-kandirilir",
   "Argüman ve Safsatalar": "/dersler/yetiskin-2-arguman-ve-safsatalar",
   "Medya, Algoritma ve Yapay Zekâ": "/dersler/yetiskin-3-medya-algoritma-ve-yapay-zeka",
+  "Satış ve Pazarlama Manipülasyonu": "/dersler/yetiskin-4-satis-ve-pazarlama-manipulasyonu",
 } as const;
 
 const farkEt = [
@@ -48,7 +49,7 @@ const adultModules = [
     body: "Ekranlarda ve satış mesajlarında ikna tekniğini tanı.",
     lessons: [
       { title: "Medya, Algoritma ve Yapay Zekâ", status: "available" },
-      { title: "Satış ve Pazarlama Manipülasyonu", status: "soon" },
+      { title: "Satış ve Pazarlama Manipülasyonu", status: "available" },
     ],
   },
   {
@@ -130,7 +131,7 @@ export default function Home() {
           </Link>
         </div>
         <p className="mt-3 text-sm text-slate-veil">
-          Şu anda Yetişkin Ders 1, 2 ve 3 hazırdır. Diğer dersler, ergen
+          Şu anda Yetişkin Ders 1, 2, 3 ve 4 hazırdır. Diğer dersler, ergen
           versiyonu, kayıt ve ödeme henüz eklenmemiştir.
         </p>
       </section>
